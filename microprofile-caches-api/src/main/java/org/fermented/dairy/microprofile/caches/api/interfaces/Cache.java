@@ -10,9 +10,9 @@ import java.util.Collection;
  */
 public interface Cache {
 
-    Object load(Object key, Loader<Object, Object> loader, String cacheName, long ttl, Class keyClass, Class valueClass);
+    Object load(Object key, Loader<Object, Object> loader, String cacheName, long ttl, Class keyClass, Class valueClass) throws Exception;
 
-    Object loadOptional(Object key, OptionalLoader<Object, Object> loader, String cacheName, long ttl, Class keyClass, Class valueClass);
+    Object loadOptional(Object key, OptionalLoader<Object, Object> loader, String cacheName, long ttl, Class keyClass, Class valueClass) throws Exception;
 
     void purge();
 

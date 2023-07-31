@@ -8,11 +8,13 @@ import java.util.Collection;
 /**
  * Cache Provider Interface
  */
-public interface CacheProvider {
+public interface Cache {
 
     Object load(Object key, Loader<Object, Object> loader, String cacheName, long ttl, Class keyClass, Class valueClass);
 
-    Object load(Object key, OptionalLoader<Object, Object> loader, String cacheName, long ttl, Class keyClass, Class valueClass);
+    Object loadOptional(Object key, OptionalLoader<Object, Object> loader, String cacheName, long ttl, Class keyClass, Class valueClass);
+
+    void purge();
 
     void removeValue(String cacheName, Object key);
 
@@ -23,4 +25,5 @@ public interface CacheProvider {
     Collection<Object> getKeys(String cacheNames);
 
     String getProviderName();
+
 }

@@ -1,15 +1,19 @@
 package org.fermented.dairy.microprofile.caches.core.providers;
 
+import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
 import org.fermented.dairy.microprofile.caches.api.functions.Loader;
 import org.fermented.dairy.microprofile.caches.api.functions.OptionalLoader;
-import org.fermented.dairy.microprofile.caches.api.interfaces.CacheProvider;
-
-import java.util.Collection;
+import org.fermented.dairy.microprofile.caches.api.interfaces.Cache;
 
 /**
- * A
+ * A hashmap based cache provider
+ *
+ * @noinspection rawtypes
  */
-public final class HashMapCacheProvider implements CacheProvider {
+public final class HashMapCache implements Cache {
+
+    private static final ConcurrentHashMap<String, ConcurrentHashMap> CACHES = new ConcurrentHashMap<>();//NOSONAR: java3740
 
     @Override
     public Object load(final Object key, final Loader<Object, Object> loader, final String cacheName, final long ttl, final Class keyClass, final Class valueClass) {
@@ -17,8 +21,13 @@ public final class HashMapCacheProvider implements CacheProvider {
     }
 
     @Override
-    public Object load(final Object key, final OptionalLoader<Object, Object> loader, final String cacheName, final long ttl, final Class keyClass, final Class valueClass) {
+    public Object loadOptional(final Object key, final OptionalLoader<Object, Object> loader, final String cacheName, final long ttl, final Class keyClass, final Class valueClass) {
         return null;
+    }
+
+    @Override
+    public void purge() {
+        CACHES.values().forEach(ConcurrentHashMap::clear);
     }
 
     @Override
@@ -33,7 +42,7 @@ public final class HashMapCacheProvider implements CacheProvider {
 
     @Override
     public Collection<String> getCacheNames() {
-        return null;
+        return CACHES.keySet();
     }
 
     @Override

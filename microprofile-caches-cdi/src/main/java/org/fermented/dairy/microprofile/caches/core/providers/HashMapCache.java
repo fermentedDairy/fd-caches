@@ -117,21 +117,12 @@ public final class HashMapCache implements Cache {
         private final long expiryTime;
         private Object value = null;
 
-        public CacheEntry(long ttl, Object value) {
-            this.expiryTime = System.currentTimeMillis() + ttl;
-            this.value = value;
-        }
-
         public CacheEntry(long ttl) {
             this.expiryTime = System.currentTimeMillis() + ttl;
         }
 
         public boolean isExpired() {
             return expiryTime <= System.currentTimeMillis();
-        }
-
-        public long getExpiryTime() {
-            return expiryTime;
         }
 
         public Object getValue() {

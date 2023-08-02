@@ -3,6 +3,7 @@ package org.fermented.dairy.microprofile.caches.core.providers;
 import java.lang.ref.SoftReference;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import org.fermented.dairy.microprofile.caches.api.exceptions.CacheException;
 import org.fermented.dairy.microprofile.caches.api.functions.Loader;
@@ -101,8 +102,9 @@ public final class HashMapCache implements Cache {
     }
 
     private void validateKeyClass(final Object key, final Class keyClass, final CacheHolder cacheHolder, final String cacheName) {
-        if(!keyClass.isInstance(key) || !cacheHolder.keyClass().isInstance(key)) {
-            throw new CacheException("%s is not a valid key class for cache %s", key.getClass().getCanonicalName(), cacheName);
+        final Object nonNullKey = Objects.requireNonNull(key, "the key cannot be null");
+        if(!keyClass.isInstance(nonNullKey) || !cacheHolder.keyClass().isInstance(nonNullKey)) {
+            throw new CacheException("%s is not a valid key class for cache %s", nonNullKey.getClass().getCanonicalName(), cacheName);
         }
     }
 

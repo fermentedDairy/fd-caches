@@ -1,0 +1,2 @@
+module microprofile.caches.cdi {
+}

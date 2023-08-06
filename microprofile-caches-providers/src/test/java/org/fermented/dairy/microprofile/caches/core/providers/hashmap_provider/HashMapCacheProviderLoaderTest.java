@@ -1,4 +1,4 @@
-package org.fermented.dairy.microprofile.caches.core.providers;
+package org.fermented.dairy.microprofile.caches.core.providers.hashmap_provider;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,11 +12,12 @@ import java.util.concurrent.Future;
 import org.fermented.dairy.microprofile.caches.api.exceptions.CacheException;
 import org.fermented.dairy.microprofile.caches.api.functions.Loader;
 import org.fermented.dairy.microprofile.caches.api.interfaces.Cache;
+import org.fermented.dairy.microprofile.caches.core.providers.HashMapCache;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class HashMapCacheProviderTest {
+class HashMapCacheProviderLoaderTest {
 
     Cache provider = new HashMapCache();
 
@@ -38,6 +39,24 @@ class HashMapCacheProviderTest {
         final Loader<Object, Object> secondLoader = key -> "Number Should Come From Cache: " + key;
         final String result1 = (String) provider.load(1L, firstLoader, "NumberCache", 3000, Long.class, String.class);
         final String result2 = (String) provider.load(1L, secondLoader, "NumberCache", 3000, Long.class, String.class);
+        assertAll("assert load results and cache state",
+                () -> assertEquals(firstLoader.load(1L), result1),
+                () -> assertEquals(firstLoader.load(1L), result2),
+                () -> assertEquals(Set.of("NumberCache"), provider.getCacheNames()),
+                () -> assertEquals(Set.of(1L), provider.getKeys("NumberCache")));
+    }
+
+    @DisplayName("""
+            with an empty cache\s
+            given an initial load (non-optional)\s
+            then second load (value based) should return the result of the first load\s
+            (load cache miss followed by value cache hit)
+            """)
+    @Test
+    void cacheMissFollowedByValueCacheHit() throws Exception {
+        final Loader<Object, Object> firstLoader = key -> "Number Loaded Into Cache: " + key;
+        final String result1 = (String) provider.load(1L, firstLoader, "NumberCache", 3000, Long.class, String.class);
+        final String result2 = (String) provider.load(1L, "Number Should Come From Cache: 1", "NumberCache", 3000, Long.class, String.class);
         assertAll("assert load results and cache state",
                 () -> assertEquals(firstLoader.load(1L), result1),
                 () -> assertEquals(firstLoader.load(1L), result2),
@@ -154,5 +173,48 @@ class HashMapCacheProviderTest {
                 () -> assertEquals(Set.of("NumberCache"), provider.getCacheNames()),
                 () -> assertEquals(Set.of(1L), provider.getKeys("NumberCache")));
 
+    }
+
+    @DisplayName("""
+            with an empty cache\s
+            given an initial load (non-optional)\s
+            then remove value from load\s
+            verify that only removed key has been removed\s
+            (load cache miss followed by remove)
+            """)
+    @Test
+    void cacheMissFollowedByValueRemoval() throws Exception {
+        final Loader<Object, Object> firstLoader = key -> "Number Loaded Into Cache: " + key;
+        final String result1 = (String) provider.load(1L, firstLoader, "NumberCache", 3000, Long.class, String.class);
+        final String result2 = (String) provider.load(2L, firstLoader, "NumberCache", 3000, Long.class, String.class);
+        assertAll("assert load results and cache state",
+                () -> assertEquals(firstLoader.load(1L), result1),
+                () -> assertEquals(firstLoader.load(2L), result2),
+                () -> assertEquals(Set.of("NumberCache"), provider.getCacheNames()),
+                () -> assertEquals(Set.of(1L, 2L), provider.getKeys("NumberCache")));
+        provider.removeValue("NumberCache", 1L);
+        assertAll("assert cache state after remove",
+                () -> assertEquals(Set.of("NumberCache"), provider.getCacheNames()),
+                () -> assertEquals(Set.of(2L), provider.getKeys("NumberCache")));
+    }
+
+    @DisplayName("""
+            with an empty cache\s
+            given an initial load (non-optional)\s
+            then clear cache\s
+            (load cache miss followed by remove)
+            """)
+    @Test
+    void cacheMissFollowedByPurge() throws Exception {
+        final Loader<Object, Object> firstLoader = key -> "Number Loaded Into Cache: " + key;
+        final String result1 = (String) provider.load(1L, firstLoader, "NumberCache", 3000, Long.class, String.class);
+        assertAll("assert load results and cache state",
+                () -> assertEquals(firstLoader.load(1L), result1),
+                () -> assertEquals(Set.of("NumberCache"), provider.getCacheNames()),
+                () -> assertEquals(Set.of(1L), provider.getKeys("NumberCache")));
+        provider.clearCache("NumberCache");
+        assertAll("assert cache state after remove",
+                () -> assertEquals(Set.of("NumberCache"), provider.getCacheNames()),
+                () -> assertEquals(Set.of(), provider.getKeys("NumberCache")));
     }
 }

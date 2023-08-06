@@ -20,6 +20,7 @@
     <modules>
         <module>microprofile-caches-api</module>
         <module>microprofile-caches-cdi</module>
+        <module>microprofile-caches-providers</module>
     </modules>
 
     <build>

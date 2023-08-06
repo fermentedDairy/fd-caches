@@ -4,6 +4,7 @@ import java.lang.ref.SoftReference;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.fermented.dairy.microprofile.caches.api.exceptions.CacheException;
@@ -47,8 +48,24 @@ public final class HashMapCache implements Cache {
     }
 
     @Override
-    public Object loadOptional(final Object key, final OptionalLoader<Object, Object> loader, final String cacheName, final long ttl, final Class keyClass, final Class valueClass) throws Exception {
-        return null;
+    public Object load(final Object key, final Object value, final String cacheName, final long ttl, final Class keyClass, final Class valueClass) throws Exception {
+        return load(key, k -> value, cacheName, ttl, keyClass, valueClass);
+    }
+
+    @Override
+    public Optional loadOptional(final Object key, final OptionalLoader<Object, Object> loader, final String cacheName, final long ttl, final Class keyClass, final Class valueClass) throws Exception {
+        return Optional.ofNullable(
+                load(
+                        key,
+                        k -> {
+                            final Optional<Object> val = loader.load(k);
+                            return val == null ? null : val.orElse(null);
+                        },
+                        cacheName,
+                        ttl,
+                        keyClass,
+                        valueClass
+                ));
     }
 
     @Override
@@ -58,12 +75,18 @@ public final class HashMapCache implements Cache {
 
     @Override
     public void removeValue(final String cacheName, final Object key) {
-        throw new UnsupportedOperationException();
+        final CacheHolder cacheHolder;
+        if( (cacheHolder = CACHES.get(cacheName)) != null) {
+            cacheHolder.cache().remove(key);
+        }
     }
 
     @Override
     public void clearCache(final String cacheName) {
-        throw new UnsupportedOperationException();
+        final CacheHolder cacheHolder;
+        if( (cacheHolder = CACHES.get(cacheName)) != null) {
+            cacheHolder.cache().clear();
+        }
     }
 
     @Override
@@ -154,34 +177,21 @@ public final class HashMapCache implements Cache {
             expiryTime = System.currentTimeMillis() + ttl; //refresh expiry time after value has been set
             this.value = value;
         }
-
-        @Override
-        public boolean equals(final Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            final CacheEntry that = (CacheEntry) o;
-            return expiryTime == that.expiryTime && Objects.equals(value, that.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(expiryTime, value);
-        }
-
-        @Override
-        public String toString() {
-            return "CacheEntry{" +
-                    "expiryTime=" + expiryTime +
-                    ", currentTime=" + System.currentTimeMillis() +
-                    ", isExpired=" + isExpired() +
-                    ", value=" + value +
-                    '}';
-        }
     }
 
     private record CacheHolder(
             ConcurrentHashMap<Object, SoftReference<CacheEntry>> cache,
-            Class keyClass, Class resultClass) {
+            Class keyClass,
+            Class resultClass) {
 
+
+        private CacheHolder(
+                final ConcurrentHashMap<Object, SoftReference<CacheEntry>> cache,
+                final Class keyClass,
+                final Class resultClass) {
+            this.cache = Objects.requireNonNull(cache);
+            this.keyClass = Objects.requireNonNull(keyClass);
+            this.resultClass = Objects.requireNonNull(resultClass);
+        }
     }
 }

@@ -13,10 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 'get maven settings file'
-      run: 'wget https://raw.githubusercontent.com/fermentedDairy/fd-devOps/main/settings.xml'
 
     - uses: actions/checkout@v3
+
+    - name: 'get maven settings file'
+      run: 'wget https://raw.githubusercontent.com/fermentedDairy/fd-devOps/main/settings.xml'
 
     - name: Set up JDK 17
       uses: actions/setup-java@v3

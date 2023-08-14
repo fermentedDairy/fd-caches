@@ -133,11 +133,6 @@ public final class HashMapCache implements Cache {
         return cache.keySet();
     }
 
-    @Override
-    public String getProviderName() {
-        return getClass().getCanonicalName();
-    }
-
     private CacheHolder getCache(final String cacheName, final Class keyClass, final Class resultClass) {
         return CACHES.computeIfAbsent(cacheName, key -> new CacheHolder(
                 new ConcurrentHashMap<>(),

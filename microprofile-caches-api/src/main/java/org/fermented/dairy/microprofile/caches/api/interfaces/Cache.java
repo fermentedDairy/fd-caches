@@ -120,6 +120,8 @@ public interface Cache {
      *
      * @return The provider name.
      */
-    String getProviderName();
+    default String getProviderName() {
+        return getClass().getCanonicalName();
+    }
 
 }

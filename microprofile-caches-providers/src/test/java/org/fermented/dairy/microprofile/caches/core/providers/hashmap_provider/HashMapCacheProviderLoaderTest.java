@@ -217,4 +217,12 @@ class HashMapCacheProviderLoaderTest {
                 () -> assertEquals(Set.of("NumberCache"), provider.getCacheNames()),
                 () -> assertEquals(Set.of(), provider.getKeys("NumberCache")));
     }
+
+    @DisplayName("""
+            calling getProviderName should return name from implementation
+            """)
+    @Test
+    void providerNameFromImplementation() {
+       assertEquals(HashMapCache.class.getCanonicalName(), provider.getProviderName());
+    }
 }

@@ -11,13 +11,6 @@
     <artifactId>microprofile-caches-api</artifactId>
 
     <packaging>jar</packaging>
-    <dependencies>
-        <dependency>
-            <groupId>jakarta.interceptor</groupId>
-            <artifactId>jakarta.interceptor-api</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-    </dependencies>
 
     <build>
         <plugins>

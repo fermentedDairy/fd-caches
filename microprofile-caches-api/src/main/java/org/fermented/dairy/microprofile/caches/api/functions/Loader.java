@@ -1,7 +1,8 @@
 package org.fermented.dairy.microprofile.caches.api.functions;
 
 /**
- * Functional interface to allow for loader lambdas that throw checked exceptions
+ * Functional interface to allow for loader lambdas that throw checked exceptions.
+ *
  * @param <P> Parameter type
  * @param <V> Value type
  */
@@ -9,10 +10,13 @@ package org.fermented.dairy.microprofile.caches.api.functions;
 public interface Loader<P, V> {
 
     /**
-     * loads the value based on the provided key
-     * @param key
+     * loads the value based on the provided key.
+     *
+     * @param param The parameter used to load the value
+     *
      * @return loaded value
-     * @throws Exception
+     *
+     * @throws Exception The exception thrown by the loading lambda
      */
-    V load(P key) throws Exception;
+    V load(P param) throws Exception;
 }

@@ -3,6 +3,7 @@ package org.fermented.dairy.microprofile.caches.core.providers;
 import java.lang.ref.SoftReference;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,53 +14,72 @@ import org.fermented.dairy.microprofile.caches.api.functions.OptionalLoader;
 import org.fermented.dairy.microprofile.caches.api.interfaces.Cache;
 
 /**
- * A hashmap based cache provider
+ * A hashmap based cache provider.
  *
  * @noinspection rawtypes
  */
 public final class HashMapCache implements Cache {
 
-    private static final ConcurrentHashMap<String, CacheHolder> CACHES = new ConcurrentHashMap<>();//NOSONAR: java3740
+    private static final ConcurrentHashMap<String, CacheHolder> CACHES = new ConcurrentHashMap<>(); //NOSONAR: java3740
 
     @Override
-    public Object load(final Object key, final Loader<Object, Object> loader, final String cacheName, final long ttl, final Class keyClass, final Class valueClass) throws Exception {
+    public Object load(final Object key,
+                       final Loader<Object, Object> loader,
+                       final String cacheName,
+                       final long ttl,
+                       final Class keyClass,
+                       final Class valueClass) throws Exception {
         final CacheHolder cacheHolder = getCache(cacheName, keyClass, valueClass);
 
         validateKeyClass(key, keyClass, cacheHolder, cacheName);
 
         final ConcurrentHashMap<Object, SoftReference<CacheEntry>> cache = cacheHolder.cache();
         SoftReference<CacheEntry> entryReference;
+        //noinspection DataFlowIssue
         if ((entryReference = cache.get(key)) == null //mapped value is null
-                || entryReference.get() == null //SoftReference that's mapped has been GCed
-                || entryReference.get().isExpired()) //cached value has expired
-        {
-
+                //SoftReference that's mapped has been GCed
+                || entryReference.get() == null
+                //cached value has expired
+                || entryReference.get().isExpired()) {
             entryReference = new SoftReference<>(
                     new CacheEntry(ttl)
             );
             return loadValueIntoCache(key, loader, cacheName, valueClass, cacheHolder, cache, entryReference);
         }
+        //noinspection DataFlowIssue
         entryReference.get().readLock().lock();
         try {
+            //noinspection DataFlowIssue
             return entryReference.get().getValue();
         } finally {
+            //noinspection DataFlowIssue
             entryReference.get().readLock().unlock();
         }
     }
 
     @Override
-    public Object load(final Object key, final Object value, final String cacheName, final long ttl, final Class keyClass, final Class valueClass) throws Exception {
+    public Object load(final Object key,
+                       final Object value,
+                       final String cacheName,
+                       final long ttl,
+                       final Class keyClass,
+                       final Class valueClass) throws Exception {
         return load(key, k -> value, cacheName, ttl, keyClass, valueClass);
     }
 
     @Override
-    public Optional loadOptional(final Object key, final OptionalLoader<Object, Object> loader, final String cacheName, final long ttl, final Class keyClass, final Class valueClass) throws Exception {
+    public Optional loadOptional(final Object key,
+                                 final OptionalLoader<Object, Object> loader,
+                                 final String cacheName,
+                                 final long ttl,
+                                 final Class keyClass,
+                                 final Class valueClass) throws Exception {
         return Optional.ofNullable(
                 load(
                         key,
                         k -> {
                             final Optional<Object> val = loader.load(k);
-                            return val == null ? null : val.orElse(null);
+                            return val == null ? null : val.orElse(null); //NOSONAR: java:S2789
                         },
                         cacheName,
                         ttl,
@@ -76,7 +96,7 @@ public final class HashMapCache implements Cache {
     @Override
     public void removeValue(final String cacheName, final Object key) {
         final CacheHolder cacheHolder;
-        if( (cacheHolder = CACHES.get(cacheName)) != null) {
+        if ((cacheHolder = CACHES.get(cacheName)) != null) {
             cacheHolder.cache().remove(key);
         }
     }
@@ -84,7 +104,7 @@ public final class HashMapCache implements Cache {
     @Override
     public void clearCache(final String cacheName) {
         final CacheHolder cacheHolder;
-        if( (cacheHolder = CACHES.get(cacheName)) != null) {
+        if ((cacheHolder = CACHES.get(cacheName)) != null) {
             cacheHolder.cache().clear();
         }
     }
@@ -98,14 +118,18 @@ public final class HashMapCache implements Cache {
     public Collection<Object> getKeys(final String cacheNames) {
         final CacheHolder cacheHolder;
 
-        if ((cacheHolder = CACHES.get(cacheNames)) == null) return Collections.emptySet();
+        if ((cacheHolder = CACHES.get(cacheNames)) == null) {
+            return Collections.emptySet();
+        }
 
         final ConcurrentHashMap<Object, SoftReference<CacheEntry>> cache = cacheHolder.cache();
-        cache.entrySet().stream()
-                .filter(
-                        entry -> entry.getValue().get() == null ||
-                                entry.getValue().get().isExpired()
-                ).forEach(entry -> cache.remove(entry.getKey()));
+        for (final Map.Entry<Object, SoftReference<CacheEntry>> entry : cache.entrySet()) {
+            //noinspection DataFlowIssue
+            if (entry.getValue().get() == null
+                    || entry.getValue().get().isExpired()) {
+                cache.remove(entry.getKey());
+            }
+        }
         return cache.keySet();
     }
 
@@ -135,11 +159,21 @@ public final class HashMapCache implements Cache {
         }
     }
 
-    private Object loadValueIntoCache(final Object key, final Loader<Object, Object> loader, final String cacheName, final Class valueClass, final CacheHolder cacheHolder, final ConcurrentHashMap<Object, SoftReference<CacheEntry>> cache, final SoftReference<CacheEntry> entryReference) throws Exception {
+    private Object loadValueIntoCache(final Object key,
+                                      final Loader<Object, Object> loader,
+                                      final String cacheName,
+                                      final Class valueClass,
+                                      final CacheHolder cacheHolder,
+                                      final ConcurrentHashMap<Object, SoftReference<CacheEntry>> cache,
+                                      final SoftReference<CacheEntry> entryReference) throws Exception {
+        //noinspection DataFlowIssue
         entryReference.get().writeLock().lock();
         try {
-            if (entryReference.get().getValue() != null)
+            //noinspection DataFlowIssue
+            if (entryReference.get().getValue() != null) {
+                //noinspection DataFlowIssue
                 return entryReference.get().getValue();
+            }
             cache.put(key, entryReference);
             final Object value;
             if ((value = loader.load(key)) == null) {
@@ -147,9 +181,12 @@ public final class HashMapCache implements Cache {
                 return null;
             }
             validateResultClass(value, valueClass, cacheHolder, cacheName);
+            //noinspection DataFlowIssue
             entryReference.get().setValue(loader.load(key));
+            //noinspection DataFlowIssue
             return entryReference.get().getValue();
         } finally {
+            //noinspection DataFlowIssue
             entryReference.get().writeLock().unlock();
         }
     }
@@ -173,7 +210,9 @@ public final class HashMapCache implements Cache {
         }
 
         public void setValue(final Object value) {
-            if (this.value != null) throw new CacheException("values can only be set once");
+            if (this.value != null) {
+                throw new CacheException("values can only be set once");
+            }
             expiryTime = System.currentTimeMillis() + ttl; //refresh expiry time after value has been set
             this.value = value;
         }

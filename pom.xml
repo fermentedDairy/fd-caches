@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.fermented.dairy.microprofile.caches</groupId>
-    <artifactId>microprofile-caches</artifactId>
+    <groupId>org.fermented.dairy.caches</groupId>
+    <artifactId>fd-caches</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -18,9 +18,9 @@
     </properties>
 
     <modules>
-        <module>microprofile-caches-api</module>
-        <module>microprofile-caches-cdi</module>
-        <module>microprofile-caches-providers</module>
+        <module>fd-caches-api</module>
+        <module>fd-caches-cdi</module>
+        <module>fd-caches-providers</module>
     </modules>
 
     <build>

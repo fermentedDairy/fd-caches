@@ -2,7 +2,6 @@ package org.fermented.dairy.caches.providers.hashmap_provider;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -30,10 +29,10 @@ class HashMapCacheProviderOptionalLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (optional)\s
-            then second load should return the result of the first load\s
-            (load cache miss followed by cache hit)
+            with an empty cache
+             given an initial load (optional)
+             then second load should return the result of the first load
+             (load cache miss followed by cache hit)
             """)
     @Test
     void cacheMissFollowedByCacheHit() throws Exception {
@@ -51,10 +50,10 @@ class HashMapCacheProviderOptionalLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (optional)\s
-            then second load (non-optional) should return the result of the first load\s
-            (load cache miss followed by cache hit (common cache name)
+            with an empty cache  
+             given an initial load (optional)
+             then second load (non-optional) should return the result of the first load
+             (load cache miss followed by cache hit (common cache name)
             """)
     @Test
     void cacheMissFollowedByCacheHitNonOptional() throws Exception {
@@ -71,10 +70,10 @@ class HashMapCacheProviderOptionalLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (optional) that returns empty from loader\s
-            then empty should be returned and nothing cached\s
-            (load cache miss null from loader)
+            with an empty cache
+             given an initial load (optional) that returns empty from loader
+             then empty should be returned and nothing cached
+             (load cache miss null from loader)
             """)
     @Test
     void cacheMissOptionalFromLoader() throws Exception {
@@ -87,10 +86,10 @@ class HashMapCacheProviderOptionalLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (optional) that returns null from loader\s
-            then empty Optional should be returned and nothing cached\s
-            (load cache miss null from loader)
+            with an empty cache
+             given an initial load (optional) that returns null from loader
+             then empty Optional should be returned and nothing cached
+             (load cache miss null from loader)
             """)
     @Test
     void cacheMissNullFromLoader() throws Exception {
@@ -103,10 +102,10 @@ class HashMapCacheProviderOptionalLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (optional), after the TTL has elapsed\s
-            then second load should return the result of the first load\s
-            (load cache miss followed by cache miss, expiry on load)
+            with an empty cache
+             given an initial load (optional), after the TTL has elapsed
+             then second load should return the result of the first load
+             (load cache miss followed by cache miss, expiry on load)
             """)
     @Test
     void cacheMissFollowedByCacheHitExpiryOnLoad() throws Exception {
@@ -128,10 +127,10 @@ class HashMapCacheProviderOptionalLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (optional), after the TTL has elapsed\s
-            then state interrogation reflect expiry\s
-            (load cache miss followed by cache miss, expiry on state interrogation)
+            with an empty cache
+             given an initial load (optional), after the TTL has elapsed
+             then state interrogation reflect expiry
+             (load cache miss followed by cache miss, expiry on state interrogation)
             """)
     @Test
     void cacheMissFollowedByCacheHitExpiryOnStateInterrogation() throws Exception {
@@ -148,10 +147,10 @@ class HashMapCacheProviderOptionalLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (optional) with incorrect key type\s
-            then throw an exception\s
-            (load cache miss followed by cache hit)
+            with an empty cache
+             given an initial load (optional) with incorrect key type
+             then throw an exception
+             (load cache miss followed by cache hit)
             """)
     @Test
     void cacheMissFollowedInvalidKeyTypeException() {
@@ -162,10 +161,10 @@ class HashMapCacheProviderOptionalLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (optional) with incorrect return type\s
-            then throw an exception\s
-            (load cache miss followed by cache hit)
+            with an empty cache
+             given an initial load (optional) with incorrect return type
+             then throw an exception
+             (load cache miss followed by cache hit)
             """)
     @Test
     void cacheMissFollowedInvalidResultTypeException() {
@@ -175,10 +174,10 @@ class HashMapCacheProviderOptionalLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (optional) concurrently with a second load\s
-            then the first load value should be loaded into the cache and returned both times\s
-            (concurrent load with same key thread locking with same key)
+            with an empty cache
+             given an initial load (optional) concurrently with a second load
+             then the first load value should be loaded into the cache and returned both times
+             (concurrent load with same key thread locking with same key)
             """)
     @Test
     void concurrentLoadWithSameKeyBlocksAllThreads() throws Exception {

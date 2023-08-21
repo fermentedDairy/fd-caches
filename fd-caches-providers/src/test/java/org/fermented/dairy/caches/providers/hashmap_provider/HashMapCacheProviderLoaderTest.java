@@ -28,10 +28,10 @@ class HashMapCacheProviderLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (non-optional)\s
-            then second load should return the result of the first load\s
-            (load cache miss followed by cache hit)
+            with an empty cache
+             given an initial load (non-optional)
+             then second load should return the result of the first load
+             (load cache miss followed by cache hit)
             """)
     @Test
     void cacheMissFollowedByCacheHit() throws Exception {
@@ -47,10 +47,10 @@ class HashMapCacheProviderLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (non-optional)\s
-            then second load (value based) should return the result of the first load\s
-            (load cache miss followed by value cache hit)
+            with an empty cache
+             given an initial load (non-optional)
+             then second load (value based) should return the result of the first load
+             (load cache miss followed by value cache hit)
             """)
     @Test
     void cacheMissFollowedByValueCacheHit() throws Exception {
@@ -65,10 +65,10 @@ class HashMapCacheProviderLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (non-optional) that returns null from loader\s
-            then null should be returned and nothing cached\s
-            (load cache miss null from loader)
+            with an empty cache
+             given an initial load (non-optional) that returns null from loader
+             then null should be returned and nothing cached
+             (load cache miss null from loader)
             """)
     @Test
     void cacheMissFNullFromLoader() throws Exception {
@@ -81,10 +81,10 @@ class HashMapCacheProviderLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (non-optional), after the TTL has elapsed\s
-            then second load should return the result of the first load\s
-            (load cache miss followed by cache miss, expiry on load)
+            with an empty cache
+             given an initial load (non-optional), after the TTL has elapsed
+             then second load should return the result of the first load
+             (load cache miss followed by cache miss, expiry on load)
             """)
     @Test
     void cacheMissFollowedByCacheHitExpiryOnLoad() throws Exception {
@@ -104,10 +104,10 @@ class HashMapCacheProviderLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (non-optional), after the TTL has elapsed\s
-            then state interrogation reflect expiry\s
-            (load cache miss followed by cache miss, expiry on state interrogation)
+            with an empty cache
+             given an initial load (non-optional), after the TTL has elapsed
+             then state interrogation reflect expiry
+             (load cache miss followed by cache miss, expiry on state interrogation)
             """)
     @Test
     void cacheMissFollowedByCacheHitExpiryOnStateInterrogation() throws Exception {
@@ -123,10 +123,10 @@ class HashMapCacheProviderLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (non-optional) with incorrect key type\s
-            then throw an exception\s
-            (load cache miss followed by cache hit)
+            with an empty cache
+             given an initial load (non-optional) with incorrect key type
+             then throw an exception
+             (load cache miss followed by cache hit)
             """)
     @Test
     void cacheMissFollowedInvalidKeyTypeException() {
@@ -136,10 +136,10 @@ class HashMapCacheProviderLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (non-optional) with incorrect return type\s
-            then throw an exception\s
-            (load cache miss followed by cache hit)
+            with an empty cache
+             given an initial load (non-optional) with incorrect return type
+             then throw an exception
+             (load cache miss followed by cache hit)
             """)
     @Test
     void cacheMissFollowedInvalidResultTypeException() {
@@ -149,10 +149,10 @@ class HashMapCacheProviderLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (non-optional) concurrently with a second load\s
-            then the first load value should be loaded into the cache and returned both times\s
-            (concurrent load with same key thread locking with same key)
+            with an empty cache
+             given an initial load (non-optional) concurrently with a second load
+             then the first load value should be loaded into the cache and returned both times
+             (concurrent load with same key thread locking with same key)
             """)
     @Test
     void concurrentLoadWithSameKeyBlocksAllThreads() throws Exception {
@@ -176,11 +176,11 @@ class HashMapCacheProviderLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (non-optional)\s
-            then remove value from load\s
-            verify that only removed key has been removed\s
-            (load cache miss followed by remove)
+            with an empty cache
+             given an initial load (non-optional)
+             then remove value from load
+             verify that only removed key has been removed
+             (load cache miss followed by remove)
             """)
     @Test
     void cacheMissFollowedByValueRemoval() throws Exception {
@@ -199,10 +199,10 @@ class HashMapCacheProviderLoaderTest {
     }
 
     @DisplayName("""
-            with an empty cache\s
-            given an initial load (non-optional)\s
-            then clear cache\s
-            (load cache miss followed by remove)
+            with an empty cache
+             given an initial load (non-optional)
+             then clear cache
+             (load cache miss followed by remove)
             """)
     @Test
     void cacheMissFollowedByPurge() throws Exception {

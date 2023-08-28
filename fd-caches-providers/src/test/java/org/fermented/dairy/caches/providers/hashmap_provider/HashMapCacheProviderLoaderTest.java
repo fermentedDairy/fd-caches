@@ -223,6 +223,6 @@ class HashMapCacheProviderLoaderTest {
             """)
     @Test
     void providerNameFromImplementation() {
-       assertEquals(HashMapCache.class.getCanonicalName(), provider.getProviderName());
+       assertEquals("internal.default.cache", provider.getProviderName());
     }
 }

@@ -1,0 +1,137 @@
+package org.fermented.dairy.caches.interceptors;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.fermented.dairy.caches.api.interfaces.Cache;
+import org.fermented.dairy.caches.interceptors.annotations.CacheKey;
+import org.fermented.dairy.caches.interceptors.annotations.CacheLoad;
+import org.fermented.dairy.caches.interceptors.annotations.Cached;
+import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorException;
+import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorRuntimeException;
+
+@Dependent
+public class AbstractCacheInterceptor {
+
+    @Inject
+    @ConfigProperty(name = "fd.caches.provider.default", defaultValue = "internal.default.cache")
+    private String defaultProviderName;
+
+    @Inject
+    @ConfigProperty(name = "fd.caches.ttl.default", defaultValue = "3000")
+    private long defaultTtl;
+
+    @Inject
+    private Config config;
+
+    @Inject
+    private Instance<Cache> providers;
+
+    private Map<String, Cache> cacheNameMap;
+
+    @PostConstruct
+    private void init() {
+        cacheNameMap = providers.stream().collect(Collectors.toMap(
+                Cache::getProviderName,
+                Function.identity()
+        ));
+
+        if (!cacheNameMap.containsKey(defaultProviderName)) {
+            throw new CacheInterceptorRuntimeException("Could not load default cache instance");
+        }
+    }
+
+    protected Cache getCache(final Method method) {
+        final Class<?> returnType = method.getReturnType();
+        final Optional<Cached> optionalCachedAnnotation = getCachedAnnotation(returnType, method);
+        final String cacheName = optionalCachedAnnotation
+                .map(Cached::cacheProviderName)
+                .filter(str -> !str.trim().isEmpty())
+                .map(String::trim)
+                .orElse(defaultProviderName);
+
+        return cacheNameMap.getOrDefault(cacheName, cacheNameMap.get(defaultProviderName));
+    }
+
+
+    protected Class<?> getActualReturnedClass(final Method method) {
+        if (method.getReturnType().isAssignableFrom(Optional.class)) {
+            return method.getAnnotation(CacheLoad.class).optionalClass();
+        } else {
+            return method.getReturnType();
+        }
+    }
+
+    protected long getTtl(final Method method) {
+        final Class<?> returnType = method.getReturnType();
+        final Optional<Cached> optionalCachedAnnotation = getCachedAnnotation(returnType, method);
+        return optionalCachedAnnotation
+                .map(Cached::ttlMilliSeconds).filter(ttlMS -> !Long.valueOf(Cached.DEFAULT_TTL).equals(ttlMS))
+                .orElse(defaultTtl);
+    }
+
+    protected String getCacheName(final Method method) {
+        final Class<?> returnType = getActualReturnedClass(method);
+
+        final Optional<Cached> optionalCachedAnnotation = getCachedAnnotation(returnType, method);
+        return optionalCachedAnnotation
+                .map(Cached::cacheName)
+                .filter(str -> !str.trim().isEmpty())
+                .map(String::trim)
+                .orElse(returnType.getCanonicalName());
+    }
+
+    private static Optional<Cached> getCachedAnnotation(final Class<?> returnType, final Method method) {
+        final Optional<Cached> optionalCachedAnnotation;
+        if (returnType.isAssignableFrom(Optional.class)) {
+            final CacheLoad cacheLoadAnnotation = method.getAnnotation(CacheLoad.class);
+            if (cacheLoadAnnotation == null) {
+                throw new CacheInterceptorRuntimeException("CacheLoad annotation must be present on the intercepted method");
+            }
+            optionalCachedAnnotation = Optional.ofNullable(
+                    cacheLoadAnnotation.optionalClass().getAnnotation(Cached.class)
+            );
+        } else {
+            optionalCachedAnnotation = Optional.ofNullable(
+                    returnType.getAnnotation(Cached.class)
+            );
+        }
+        return optionalCachedAnnotation;
+    }
+
+    protected Object getCacheKey(final Method method, final Object[] params) throws CacheInterceptorException {
+
+        if (params == null || params.length == 0) {
+            throw new CacheInterceptorException(
+                    "No parameters on method %s in class %s, could not determine cache key.",
+                    method.getName(),
+                    method.getDeclaringClass().getCanonicalName());
+        }
+
+        if (params.length == 1) {
+            return params[0];
+        }
+
+        final Annotation[][] paramAnnotations = method.getParameterAnnotations();
+        for (int paramIndex = 0; paramIndex < paramAnnotations.length; paramIndex++) {
+            for (final Annotation annotation : paramAnnotations[paramIndex]) {
+                if (annotation.annotationType().isAssignableFrom(CacheKey.class)) {
+                    return params[paramIndex];
+                }
+            }
+        }
+        throw new CacheInterceptorException(
+                "No parameter is on annotated with the 'CacheKey' annotation for method %s in class, could not determine cache key.",
+                method.getName(),
+                method.getDeclaringClass().getCanonicalName());
+    }
+}

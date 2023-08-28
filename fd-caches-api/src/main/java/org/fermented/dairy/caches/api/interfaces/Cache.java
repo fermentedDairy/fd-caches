@@ -25,7 +25,7 @@ public interface Cache {
      * @param key The cache key, also used as a parameter when invoking the loader function
      * @param loader The loader functional interface
      * @param cacheName The name of the cache to store the value in
-     * @param ttl The time to live (ttl) before the cache expires in milliseconds
+     * @param ttlMilliSeconds The time to live (ttlMilliSeconds) before the cache expires in milliseconds
      * @param keyClass The Class object of the cache key
      * @param valueClass The Class object of the value
      *
@@ -35,7 +35,7 @@ public interface Cache {
      *
      * @throws Exception Checked exception thrown by the loader function
      */
-    Object load(Object key, Loader<Object, Object> loader, String cacheName, long ttl, Class keyClass, Class valueClass) throws Exception;
+    Object load(Object key, Loader<Object, Object> loader, String cacheName, long ttlMilliSeconds, Class keyClass, Class valueClass) throws Exception;
 
     /**
      * Place the value object into the named cache indexed by the provided key.
@@ -44,7 +44,7 @@ public interface Cache {
      * @param key The cache key, also used as a parameter when invoking the loader function.
      * @param value The value to be placed in the cache.
      * @param cacheName The name of the cache to store the value in.
-     * @param ttl The time to live (ttl) before the cache expires in milliseconds.
+     * @param ttlMillieSeconds The time to live (ttlMillieSeconds) before the cache expires in milliseconds.
      * @param keyClass The Class object of the cache key.
      * @param valueClass The Class object of the value wrapped in the Optional loaded by the OptionalLoader functional interface.
      *
@@ -52,7 +52,7 @@ public interface Cache {
      *
      * @throws Exception Checked exception
      */
-    Object load(Object key, Object value, String cacheName, long ttl, Class keyClass, Class valueClass) throws Exception;
+    Object load(Object key, Object value, String cacheName, long ttlMillieSeconds, Class keyClass, Class valueClass) throws Exception;
 
     /**
      * Load the value using the OptionalLoader function and stores it in the cache.
@@ -61,7 +61,7 @@ public interface Cache {
      * @param key The cache key, also used as a parameter when invoking the loader function.
      * @param loader The loader functional interface, returning an Optional.
      * @param cacheName The name of the cache to store the value in.
-     * @param ttl The time to live (ttl) before the cache expires in milliseconds.
+     * @param ttlMilliSeconds The time to live (ttlMilliSeconds) before the cache expires in milliseconds.
      * @param keyClass The Class object of the cache key.
      * @param valueClass The Class object of the value wrapped in the Optional loaded by the OptionalLoader functional interface.
      *
@@ -74,7 +74,7 @@ public interface Cache {
     Optional loadOptional(Object key,
                           OptionalLoader<Object, Object> loader,
                           String cacheName,
-                          long ttl,
+                          long ttlMilliSeconds,
                           Class keyClass,
                           Class valueClass) throws Exception;
 

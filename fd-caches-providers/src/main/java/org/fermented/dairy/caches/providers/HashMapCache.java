@@ -26,7 +26,7 @@ public final class HashMapCache implements Cache {
     public Object load(final Object key,
                        final Loader<Object, Object> loader,
                        final String cacheName,
-                       final long ttl,
+                       final long ttlMilliSeconds,
                        final Class keyClass,
                        final Class valueClass) throws Exception {
         final CacheHolder cacheHolder = getCache(cacheName, keyClass, valueClass);
@@ -42,7 +42,7 @@ public final class HashMapCache implements Cache {
                 //cached value has expired
                 || entryReference.get().isExpired()) {
             entryReference = new SoftReference<>(
-                    new CacheEntry(ttl)
+                    new CacheEntry(ttlMilliSeconds)
             );
             return loadValueIntoCache(key, loader, cacheName, valueClass, cacheHolder, cache, entryReference);
         }
@@ -61,17 +61,17 @@ public final class HashMapCache implements Cache {
     public Object load(final Object key,
                        final Object value,
                        final String cacheName,
-                       final long ttl,
+                       final long ttlMillieSeconds,
                        final Class keyClass,
                        final Class valueClass) throws Exception {
-        return load(key, k -> value, cacheName, ttl, keyClass, valueClass);
+        return load(key, k -> value, cacheName, ttlMillieSeconds, keyClass, valueClass);
     }
 
     @Override
     public Optional loadOptional(final Object key,
                                  final OptionalLoader<Object, Object> loader,
                                  final String cacheName,
-                                 final long ttl,
+                                 final long ttlMilliSeconds,
                                  final Class keyClass,
                                  final Class valueClass) throws Exception {
         return Optional.ofNullable(
@@ -82,7 +82,7 @@ public final class HashMapCache implements Cache {
                             return val == null ? null : val.orElse(null); //NOSONAR: java:S2789
                         },
                         cacheName,
-                        ttl,
+                        ttlMilliSeconds,
                         keyClass,
                         valueClass
                 ));
@@ -184,6 +184,11 @@ public final class HashMapCache implements Cache {
             //noinspection DataFlowIssue
             entryReference.get().writeLock().unlock();
         }
+    }
+
+    @Override
+    public String getProviderName() {
+        return "internal.default.cache";
     }
 
     private static final class CacheEntry extends ReentrantReadWriteLock {

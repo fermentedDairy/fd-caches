@@ -14,4 +14,5 @@ import java.lang.annotation.Target;
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CacheLoad {
+    Class<?> optionalClass() default Object.class;
 }

@@ -22,6 +22,8 @@ import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorRuntim
 @Dependent
 public class AbstractCacheInterceptor {
 
+    private static final String CONFIG_TEMPLATE = "fd.config.cache.%s.%s";
+
     @Inject
     @ConfigProperty(name = "fd.caches.provider.default", defaultValue = "internal.default.cache")
     private String defaultProviderName;
@@ -51,8 +53,14 @@ public class AbstractCacheInterceptor {
     }
 
     protected Cache getCache(final Method method) {
-        final Class<?> returnType = method.getReturnType();
-        final Optional<Cached> optionalCachedAnnotation = getCachedAnnotation(returnType, method);
+        final Class<?> returnType = getActualReturnedClass(method);
+        final Optional<String> cacheProviderConfig = config.getOptionalValue(
+                CONFIG_TEMPLATE.formatted(returnType.getCanonicalName(), "cacheprovider"), String.class);
+        if (cacheProviderConfig.isPresent()) {
+            return cacheNameMap.getOrDefault(cacheProviderConfig.get(), cacheNameMap.get(defaultProviderName));
+        }
+
+        final Optional<Cached> optionalCachedAnnotation = getCachedAnnotation(method.getReturnType(), method);
         final String cacheName = optionalCachedAnnotation
                 .map(Cached::cacheProviderName)
                 .filter(str -> !str.trim().isEmpty())
@@ -72,15 +80,28 @@ public class AbstractCacheInterceptor {
     }
 
     protected long getTtl(final Method method) {
-        final Class<?> returnType = method.getReturnType();
-        final Optional<Cached> optionalCachedAnnotation = getCachedAnnotation(returnType, method);
+
+        final Class<?> returnType = getActualReturnedClass(method);
+        final Optional<Long> ttlConfig = config.getOptionalValue(
+                CONFIG_TEMPLATE.formatted(returnType.getCanonicalName(), "ttlms"), Long.class);
+        if (ttlConfig.isPresent()) {
+            return ttlConfig.get();
+        }
+
+        final Optional<Cached> optionalCachedAnnotation = getCachedAnnotation(method.getReturnType(), method);
         return optionalCachedAnnotation
                 .map(Cached::ttlMilliSeconds).filter(ttlMS -> !Long.valueOf(Cached.DEFAULT_TTL).equals(ttlMS))
                 .orElse(defaultTtl);
     }
 
     protected String getCacheName(final Method method) {
+
         final Class<?> returnType = getActualReturnedClass(method);
+        final Optional<String> cacheNameConfig = config.getOptionalValue(
+                CONFIG_TEMPLATE.formatted(returnType.getCanonicalName(), "cachename"), String.class);
+        if (cacheNameConfig.isPresent()) {
+            return cacheNameConfig.get();
+        }
 
         final Optional<Cached> optionalCachedAnnotation = getCachedAnnotation(returnType, method);
         return optionalCachedAnnotation

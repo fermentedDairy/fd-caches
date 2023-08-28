@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
+import org.eclipse.microprofile.config.Config;
 import org.fermented.dairy.caches.api.functions.Loader;
 import org.fermented.dairy.caches.api.functions.OptionalLoader;
 import org.fermented.dairy.caches.api.interfaces.Cache;
@@ -49,6 +50,7 @@ class CacheLoadInterceptorTest {
     Cache cache2;
 
     @Mock
+    Config config;
 
     List<Cache> cacheInstances;
 
@@ -135,6 +137,41 @@ class CacheLoadInterceptorTest {
         final Object actual = cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(key), key));
         assertEquals(new DefaultCacheEntityClass(1L), actual);
     }
+
+    @DisplayName("""
+            The intercepted method has a single unannotated param. Cache, cache name and TTL overridden from config.
+             Method: NamedCacheBean namedLoad(Long param)
+            """)
+    @Test
+    void singleUnannotatedOverriddenCacheCorrectKeyTypeConfigOverrides() throws Exception {
+
+        final Method interceptedMethod = CacheBean.class.getMethod("namedLoad", Long.class);
+        final Long key = 1L;
+
+        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cacheprovider", String.class)).thenReturn(Optional.of("cache2"));
+        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cachename", String.class)).thenReturn(Optional.of("configcachename"));
+        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".ttlms", Long.class)).thenReturn(Optional.of(1234L));
+
+        when(cache2.load(
+                any(Object.class),
+                any(Loader.class),
+                any(String.class),
+                any(Long.class),
+                any(Class.class),
+                any(Class.class)
+        )).thenAnswer(invocationOnMock -> {
+            assertAll("Validate Parameters",
+                    () -> assertEquals(key, invocationOnMock.getArgument(0), "Key is incorrect"),
+                    () -> assertEquals("configcachename", invocationOnMock.getArgument(2), "Cache name is incorrect"),
+                    () -> assertEquals(1234L, (long)invocationOnMock.getArgument(3), "ttl is incorrect"),
+                    () -> assertEquals(Long.class, invocationOnMock.getArgument(4), "keyClass is incorrect"),
+                    () -> assertEquals(NamedCachedBean.class, invocationOnMock.getArgument(5), "valueClass is incorrect"));
+            return ((Loader)invocationOnMock.getArgument(1)).load(invocationOnMock.getArgument(0));
+        });
+        final Object actual = cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(key), key));
+        assertEquals(new DefaultCacheEntityClass(1L), actual);
+    }
+
 
     @DisplayName("""
             The intercepted method has multiple params, one is annotated as a key. Param is the same type as annotated key member in DefaultCacheEntity, default cache is used.
@@ -235,6 +272,40 @@ class CacheLoadInterceptorTest {
         final Object actual = cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, Optional.of(new NamedCachedBean(key)), key));
         assertEquals(Optional.of(new NamedCachedBean(1L)), actual);
     }
+
+    @DisplayName("""
+            The intercepted method has a single unannotated param and Optional return. Cache and cache name is used from config.
+             Method: Optional<DefaultCacheEntity> load(Long param)
+            """)
+    @Test
+    void singleUnannotatedOptionalNamedCacheCorrectKeyTypeConfiogOverrides() throws Exception {
+        final Method interceptedMethod = CacheBean.class.getMethod("namedOptionalLoad", Long.class);
+        final Long key = 1L;
+
+        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cacheprovider", String.class)).thenReturn(Optional.of("cache2"));
+        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cachename", String.class)).thenReturn(Optional.of("configcachename"));
+        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".ttlms", Long.class)).thenReturn(Optional.of(1234L));
+
+        when(cache2.loadOptional(
+                any(Object.class),
+                any(OptionalLoader.class),
+                any(String.class),
+                any(Long.class),
+                any(Class.class),
+                any(Class.class)
+        )).thenAnswer(invocationOnMock -> {
+            assertAll("Validate Parameters",
+                    () -> assertEquals(key, invocationOnMock.getArgument(0), "Key is incorrect"),
+                    () -> assertEquals("configcachename", invocationOnMock.getArgument(2), "Cache name is incorrect"),
+                    () -> assertEquals(1234L, (long)invocationOnMock.getArgument(3), "ttl is incorrect"),
+                    () -> assertEquals(Long.class, invocationOnMock.getArgument(4), "keyClass is incorrect"),
+                    () -> assertEquals(NamedCachedBean.class, invocationOnMock.getArgument(5), "valueClass is incorrect"));
+            return ((OptionalLoader)invocationOnMock.getArgument(1)).load(invocationOnMock.getArgument(0));
+        });
+        final Object actual = cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, Optional.of(new NamedCachedBean(key)), key));
+        assertEquals(Optional.of(new NamedCachedBean(1L)), actual);
+    }
+
 
     @DisplayName("""
             The intercepted method has a single unannotated param and Optional return. Param is the same type as annotated key member in DefaultCacheEntity, default cache is used.

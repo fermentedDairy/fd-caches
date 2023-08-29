@@ -29,10 +29,15 @@ public class CacheLoadInterceptor extends AbstractCacheInterceptor {
     @AroundInvoke
     public Object loadIntoCache(final InvocationContext ctx) throws Exception {
 
+
+
         final Method method = ctx.getMethod();
         final Class<?> returnedClass = method.getReturnType();
-        final Object[] params = ctx.getParameters();
+        if(isCacheDisabled(method)) {
+            return ctx.proceed();
+        }
 
+        final Object[] params = ctx.getParameters();
         final Object cacheKey = getCacheKey(method, params);
 
         if (returnedClass.isAssignableFrom(Optional.class)) {

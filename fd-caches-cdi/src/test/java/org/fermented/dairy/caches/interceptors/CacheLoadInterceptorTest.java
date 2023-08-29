@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jakarta.enterprise.inject.Instance;
@@ -148,6 +150,7 @@ class CacheLoadInterceptorTest {
         final Method interceptedMethod = CacheBean.class.getMethod("namedLoad", Long.class);
         final Long key = 1L;
 
+        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".disabled", Boolean.class)).thenReturn(Optional.empty());
         when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cacheprovider", String.class)).thenReturn(Optional.of("cache2"));
         when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cachename", String.class)).thenReturn(Optional.of("configcachename"));
         when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".ttlms", Long.class)).thenReturn(Optional.of(1234L));
@@ -172,6 +175,45 @@ class CacheLoadInterceptorTest {
         assertEquals(new DefaultCacheEntityClass(1L), actual);
     }
 
+    @DisplayName("""
+            The intercepted method has a single unannotated param. Cache disabled in config
+             Method: NamedCacheBean namedLoad(Long param)
+            """)
+    @Test
+    void singleUnannotatedOverriddenCacheCorrectKeyTypeConfigCacheDisabled() throws Exception {
+
+        final Method interceptedMethod = CacheBean.class.getMethod("namedLoad", Long.class);
+        final Long key = 1L;
+
+        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".disabled", Boolean.class)).thenReturn(Optional.of(true));
+
+        final Object actual = cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(key), key));
+        verify(cache1, never()).load(
+                any(Object.class),
+                any(Loader.class),
+                any(String.class),
+                any(Long.class),
+                any(Class.class),
+                any(Class.class)
+        );
+        verify(cache2, never()).load(
+                any(Object.class),
+                any(Loader.class),
+                any(String.class),
+                any(Long.class),
+                any(Class.class),
+                any(Class.class)
+        );
+        verify(defaultCache, never()).load(
+                any(Object.class),
+                any(Loader.class),
+                any(String.class),
+                any(Long.class),
+                any(Class.class),
+                any(Class.class)
+        );
+        assertEquals(new DefaultCacheEntityClass(1L), actual);
+    }
 
     @DisplayName("""
             The intercepted method has multiple params, one is annotated as a key. Param is the same type as annotated key member in DefaultCacheEntity, default cache is used.
@@ -274,14 +316,54 @@ class CacheLoadInterceptorTest {
     }
 
     @DisplayName("""
+            The intercepted method has a single unannotated param and Optional return. Cache disabled in config.
+             Method: Optional<DefaultCacheEntity> load(Long param)
+            """)
+    @Test
+    void singleUnannotatedOptionalNamedCacheCorrectKeyTypeConfigDisabled() throws Exception {
+        final Method interceptedMethod = CacheBean.class.getMethod("namedOptionalLoad", Long.class);
+        final Long key = 1L;
+
+        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".disabled", Boolean.class)).thenReturn(Optional.of(true));
+
+        final Object actual = cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, Optional.of(new NamedCachedBean(key)), key));
+        verify(cache1, never()).loadOptional(
+                any(Object.class),
+                any(OptionalLoader.class),
+                any(String.class),
+                any(Long.class),
+                any(Class.class),
+                any(Class.class)
+        );
+        verify(cache2, never()).loadOptional(
+                any(Object.class),
+                any(OptionalLoader.class),
+                any(String.class),
+                any(Long.class),
+                any(Class.class),
+                any(Class.class)
+        );
+        verify(defaultCache, never()).loadOptional(
+                any(Object.class),
+                any(OptionalLoader.class),
+                any(String.class),
+                any(Long.class),
+                any(Class.class),
+                any(Class.class)
+        );
+        assertEquals(Optional.of(new NamedCachedBean(1L)), actual);
+    }
+
+    @DisplayName("""
             The intercepted method has a single unannotated param and Optional return. Cache and cache name is used from config.
              Method: Optional<DefaultCacheEntity> load(Long param)
             """)
     @Test
-    void singleUnannotatedOptionalNamedCacheCorrectKeyTypeConfiogOverrides() throws Exception {
+    void singleUnannotatedOptionalNamedCacheCorrectKeyTypeConfigOverrides() throws Exception {
         final Method interceptedMethod = CacheBean.class.getMethod("namedOptionalLoad", Long.class);
         final Long key = 1L;
 
+        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".disabled", Boolean.class)).thenReturn(Optional.empty());
         when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cacheprovider", String.class)).thenReturn(Optional.of("cache2"));
         when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cachename", String.class)).thenReturn(Optional.of("configcachename"));
         when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".ttlms", Long.class)).thenReturn(Optional.of(1234L));
@@ -305,7 +387,6 @@ class CacheLoadInterceptorTest {
         final Object actual = cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, Optional.of(new NamedCachedBean(key)), key));
         assertEquals(Optional.of(new NamedCachedBean(1L)), actual);
     }
-
 
     @DisplayName("""
             The intercepted method has a single unannotated param and Optional return. Param is the same type as annotated key member in DefaultCacheEntity, default cache is used.

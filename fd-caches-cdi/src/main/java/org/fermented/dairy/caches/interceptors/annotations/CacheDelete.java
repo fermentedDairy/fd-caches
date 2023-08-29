@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * This should be used when deleting the entity from the underlying source.
  */
 @InterceptorBinding
-@Target({ ElementType.METHOD })
+@Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CacheDelete {
 }

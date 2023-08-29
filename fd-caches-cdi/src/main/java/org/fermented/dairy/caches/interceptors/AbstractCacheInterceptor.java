@@ -155,4 +155,10 @@ public class AbstractCacheInterceptor {
                 method.getName(),
                 method.getDeclaringClass().getCanonicalName());
     }
+
+    protected boolean isCacheDisabled(Method method) {
+        return config.getOptionalValue(CONFIG_TEMPLATE.formatted(
+                getActualReturnedClass(method).getCanonicalName(),
+                "disabled"), Boolean.class).orElse(false);
+    }
 }

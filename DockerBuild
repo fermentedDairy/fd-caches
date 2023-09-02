@@ -1,0 +1,3 @@
+FROM maven:3.9.4-eclipse-temurin-17-alpine
+COPY . .
+RUN mvn -B package verify -s settings.xml

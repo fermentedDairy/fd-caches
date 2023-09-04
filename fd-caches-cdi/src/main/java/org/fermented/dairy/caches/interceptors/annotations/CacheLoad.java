@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 /**
  * Indicates that the annotated method should load the result from the cache in the case of a cache hit or load into the cache
  * in the case of a cache miss and return result.
+ * Can be used with the {@link CacheDelete} annotation (using parameters for the keys) to update a value in cache.
  */
 @InterceptorBinding
 @Target({ ElementType.METHOD, ElementType.TYPE })

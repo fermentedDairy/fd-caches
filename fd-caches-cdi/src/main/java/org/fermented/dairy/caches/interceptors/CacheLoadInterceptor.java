@@ -7,6 +7,7 @@ import jakarta.interceptor.InvocationContext;
 import java.lang.reflect.Method;
 import java.util.Optional;
 import org.fermented.dairy.caches.interceptors.annotations.CacheLoad;
+import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorException;
 
 /**
  * CDI caching interceptor.
@@ -17,7 +18,8 @@ import org.fermented.dairy.caches.interceptors.annotations.CacheLoad;
 public class CacheLoadInterceptor extends AbstractCacheInterceptor {
 
     /**
-     * Interceptor method invoked around th target method (annotated with {@link CacheLoad}).
+     * Interceptor method invoked around the target method (annotated with {@link CacheLoad}).
+     * Can be used with the {@link CacheLoad} annotation (using parameters for the keys) to update a value in cache.
      *
      * @param ctx the invocation context.
      *
@@ -30,9 +32,12 @@ public class CacheLoadInterceptor extends AbstractCacheInterceptor {
     public Object loadIntoCache(final InvocationContext ctx) throws Exception {
 
 
-
         final Method method = ctx.getMethod();
         final Class<?> returnedClass = method.getReturnType();
+
+        if(returnedClass.isAssignableFrom(void.class) || returnedClass.isAssignableFrom(Void.class)) {
+            throw new CacheInterceptorException("void types cannot be cached");
+        }
         if(isCacheDisabled(method)) {
             return ctx.proceed();
         }

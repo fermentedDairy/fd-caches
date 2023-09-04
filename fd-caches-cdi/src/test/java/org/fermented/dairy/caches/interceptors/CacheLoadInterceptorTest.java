@@ -434,7 +434,7 @@ class CacheLoadInterceptorTest {
              Method: DefaultCacheEntity defaultLoad(Long dummy, Long param)
             """)
     @Test
-    void singleUnannotatedDefaultCacheOptionalNoParamsType() throws Exception {
+    void singleUnannotatedDefaultCacheNoParamsType() throws Exception {
         final Method interceptedMethod = CacheBean.class.getMethod("defaultLoad");
 
         final CacheInterceptorException actualException = assertThrows(CacheInterceptorException.class, () -> cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L))));
@@ -442,5 +442,17 @@ class CacheLoadInterceptorTest {
                 actualException.getMessage());
     }
 
+    @DisplayName("""
+            The intercepted method has void return type, Exception is thrown.
+             Method: void loadVoid(Long param)
+            """)
+    @Test
+    void singleUnannotatedDefaultCacheVoidReturnType() throws Exception {
+        final Method interceptedMethod = CacheBean.class.getMethod("loadVoid", Long.class);
+
+        final CacheInterceptorException actualException = assertThrows(CacheInterceptorException.class, () -> cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L))));
+        assertEquals("void types cannot be cached",
+                actualException.getMessage());
+    }
 
 }

@@ -13,11 +13,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v4
 
-    - uses: actions/checkout@v3
-
-    - name: 'get maven settings file'
-      run: 'wget https://raw.githubusercontent.com/fermentedDairy/fd-devOps/main/settings.xml'
+    - uses: actions/checkout@v4
+      with:
+        repository: fermentedDairy/fd-devOps
+        path: devops
 
     - name: Build inside docker
-      run:  docker build . -f DockerBuild
+      run:  docker build . -f devops/DockerBuild

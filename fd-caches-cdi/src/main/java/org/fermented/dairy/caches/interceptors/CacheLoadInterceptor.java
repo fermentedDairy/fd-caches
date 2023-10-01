@@ -35,10 +35,10 @@ public class CacheLoadInterceptor extends AbstractCacheInterceptor {
         final Method method = ctx.getMethod();
         final Class<?> returnedClass = method.getReturnType();
 
-        if(returnedClass.isAssignableFrom(void.class) || returnedClass.isAssignableFrom(Void.class)) {
+        if (returnedClass.isAssignableFrom(void.class) || returnedClass.isAssignableFrom(Void.class)) {
             throw new CacheInterceptorException("void types cannot be cached");
         }
-        if(isCacheDisabled(method)) {
+        if (isCacheDisabled(method)) {
             return ctx.proceed();
         }
 
@@ -47,14 +47,14 @@ public class CacheLoadInterceptor extends AbstractCacheInterceptor {
 
         if (returnedClass.isAssignableFrom(Optional.class)) {
             final Class<?> returnOptionalClass = getActualReturnedClass(method);
-            return getCache(method).loadOptional(cacheKey,
+            return getCacheForLoad(method).loadOptional(cacheKey,
                     param -> (Optional) ctx.proceed(),
                     getCacheName(method),
                     getTtl(method),
                     cacheKey.getClass(),
                     returnOptionalClass);
         } else {
-            return getCache(method).load(cacheKey,
+            return getCacheForLoad(method).load(cacheKey,
                     param -> ctx.proceed(),
                     getCacheName(method),
                     getTtl(method),

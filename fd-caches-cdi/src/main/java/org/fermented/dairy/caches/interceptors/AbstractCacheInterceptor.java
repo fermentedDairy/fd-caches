@@ -7,18 +7,23 @@ import jakarta.inject.Inject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.fermented.dairy.caches.api.interfaces.Cache;
+import org.fermented.dairy.caches.interceptors.annotations.CacheDelete;
 import org.fermented.dairy.caches.interceptors.annotations.CacheKey;
 import org.fermented.dairy.caches.interceptors.annotations.CacheLoad;
 import org.fermented.dairy.caches.interceptors.annotations.Cached;
 import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorException;
 import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorRuntimeException;
 
+/**
+ * Abstract parent class for all interceptors.
+ */
 @Dependent
 public class AbstractCacheInterceptor {
 
@@ -52,7 +57,7 @@ public class AbstractCacheInterceptor {
         }
     }
 
-    protected Cache getCache(final Method method) {
+    protected Cache getCacheForLoad(final Method method) {
         final Class<?> returnType = getActualReturnedClass(method);
         final Optional<String> cacheProviderConfig = config.getOptionalValue(
                 CONFIG_TEMPLATE.formatted(returnType.getCanonicalName(), "cacheprovider"), String.class);
@@ -68,6 +73,37 @@ public class AbstractCacheInterceptor {
                 .orElse(defaultProviderName);
 
         return cacheNameMap.getOrDefault(cacheName, cacheNameMap.get(defaultProviderName));
+    }
+
+    protected Cache getCacheForDelete(final Method method) {
+        final Class<?> cacheClass = getCachedlassForDelete(method);
+
+        final Optional<String> cacheProviderConfig = config.getOptionalValue(
+                CONFIG_TEMPLATE.formatted(cacheClass.getCanonicalName(), "cacheprovider"), String.class);
+        if (cacheProviderConfig.isPresent()) {
+            return cacheNameMap.getOrDefault(cacheProviderConfig.get(), cacheNameMap.get(defaultProviderName));
+        }
+
+        final Optional<Cached> optionalCachedAnnotation = getCachedAnnotation(cacheClass, method);
+        final String cacheName = optionalCachedAnnotation
+                .map(Cached::cacheProviderName)
+                .filter(str -> !str.trim().isEmpty())
+                .map(String::trim)
+                .orElse(defaultProviderName);
+
+        return cacheNameMap.getOrDefault(cacheName, cacheNameMap.get(defaultProviderName));
+    }
+
+    private static Class<?> getCachedlassForDelete(final Method method) {
+        final Class<?> cacheClass = Objects.requireNonNullElseGet(
+                method.getAnnotation(CacheDelete.class),
+                () -> {
+                    throw new CacheInterceptorRuntimeException("CacheDelete annotation must be present"); //hack for throw if null
+                }).cacheClass();
+        if (cacheClass.equals(Void.class)) {
+            throw new CacheInterceptorRuntimeException("CacheDelete annotation must be present");
+        }
+        return cacheClass;
     }
 
 
@@ -109,6 +145,23 @@ public class AbstractCacheInterceptor {
                 .filter(str -> !str.trim().isEmpty())
                 .map(String::trim)
                 .orElse(returnType.getCanonicalName());
+    }
+
+    protected String getCacheNameForDelete(final Method method) {
+
+        final Class<?> cachedClass = getCachedlassForDelete(method);
+        final Optional<String> cacheNameConfig = config.getOptionalValue(
+                CONFIG_TEMPLATE.formatted(cachedClass.getCanonicalName(), "cachename"), String.class);
+        if (cacheNameConfig.isPresent()) {
+            return cacheNameConfig.get();
+        }
+
+        final Optional<Cached> optionalCachedAnnotation = getCachedAnnotation(cachedClass, method);
+        return optionalCachedAnnotation
+                .map(Cached::cacheName)
+                .filter(str -> !str.trim().isEmpty())
+                .map(String::trim)
+                .orElse(cachedClass.getCanonicalName());
     }
 
     private static Optional<Cached> getCachedAnnotation(final Class<?> returnType, final Method method) {
@@ -156,7 +209,7 @@ public class AbstractCacheInterceptor {
                 method.getDeclaringClass().getCanonicalName());
     }
 
-    protected boolean isCacheDisabled(Method method) {
+    protected boolean isCacheDisabled(final Method method) {
         return config.getOptionalValue(CONFIG_TEMPLATE.formatted(
                 getActualReturnedClass(method).getCanonicalName(),
                 "disabled"), Boolean.class).orElse(false);

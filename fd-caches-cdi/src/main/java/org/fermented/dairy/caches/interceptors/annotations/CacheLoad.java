@@ -15,5 +15,11 @@ import java.lang.annotation.Target;
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CacheLoad {
-    Class<?> optionalClass() default Object.class;
+
+    /**
+     * The cached class Class object. Required if the intercepted method returns an Optional.
+     *
+     * @return The cached class Class object.
+     */
+    Class<?> optionalClass() default Void.class;
 }

@@ -5,6 +5,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
+import org.fermented.dairy.caches.api.interfaces.Cache;
 import org.fermented.dairy.caches.interceptors.annotations.CacheDelete;
 import org.fermented.dairy.caches.interceptors.annotations.CacheLoad;
 
@@ -29,7 +30,12 @@ public class CacheDeleteInterceptor extends AbstractCacheInterceptor {
      */
     @AroundInvoke
     public Object deleteFromCache(final InvocationContext ctx) throws Exception {
-        Object result = ctx.proceed();
-        return result;
+
+        final Cache cacheProvider = getCacheForDelete(ctx.getMethod());
+        final String cacheName = getCacheNameForDelete(ctx.getMethod());
+        final Object key = getCacheKey(ctx.getMethod(), ctx.getParameters());
+
+        cacheProvider.removeValue(cacheName, key);
+        return ctx.proceed();
     }
 }

@@ -60,43 +60,33 @@ public class CacheBean {
         //No Op
     }
 
-    @CacheDelete
-    public void deleteFirst(Long key) {
-        //No Op
+    @CacheDelete(cacheClass = DefaultCacheEntityClass.class)
+    public DefaultCacheEntityClass deleteDefault(Long key) {
+        return null;
     }
 
-    @CacheDelete(deleteFirst = false)
-    public void deleteAfter(Long key) {
-        //No Op
+    @CacheDelete(cacheClass = DefaultCacheEntityClass.class)
+    public DefaultCacheEntityClass deleteDefault(Object dummy, @CacheKey Long key) {
+        return null;
     }
 
-    @CacheDelete
-    public DefaultCacheEntityClass deleteFirstResultKey(Long key){
-        return new DefaultCacheEntityClass(key);
+    @CacheDelete(cacheClass = DefaultCacheEntityClass.class)
+    public DefaultCacheEntityClass deleteDefault(Long dummy, Long key) {
+        return null;
     }
 
-    @CacheDelete(deleteFirst = false)
-    public DefaultCacheEntityClass deleteAfterResultKey(Long key){
-        return new DefaultCacheEntityClass(key);
+    @CacheDelete(cacheClass = NamedCachedBean.class)
+    public NamedCachedBean deleteNamed(Long key) {
+        return null;
     }
 
-    @CacheDelete
-    public void deleteFirst(Object dummy, @CacheKey Long key) {
-        //No Op
+    @CacheDelete(cacheClass = NamedCachedBean.class)
+    public NamedCachedBean deleteNamed(Object dummy, @CacheKey Long key) {
+        return null;
     }
 
-    @CacheDelete(deleteFirst = false)
-    public void deleteAfter(Object dummy, @CacheKey Long key) {
-        //no op
-    }
-
-    @CacheDelete(deleteFirst = false)
-    public void deleteAfter(Long dummy,  Long key) {
-        //No Op
-    }
-
-    @CacheDelete
-    Optional<DefaultCacheEntityClass> deleteFirstOptional(Long key) {
-        return Optional.of(new DefaultCacheEntityClass(key));
+    @CacheDelete(cacheClass = NamedCachedBean.class)
+    public NamedCachedBean deleteNamed(Long dummy, Long key) {
+        return null;
     }
 }

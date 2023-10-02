@@ -33,9 +33,7 @@ public class CacheDeleteInterceptor extends AbstractCacheInterceptor {
      * Interceptor method invoked around the target method (annotated with {@link CacheDelete}).
      *
      * @param ctx The InvocationContext of the intercepted method
-     *
      * @return the result of {@code ctx.proceed()}
-     *
      * @throws Exception The exception thrown by the {@code ctx.proceed()} call
      */
     @AroundInvoke
@@ -79,4 +77,6 @@ public class CacheDeleteInterceptor extends AbstractCacheInterceptor {
             throw new CacheInterceptorException(e);
         }
     }
+
+
 }

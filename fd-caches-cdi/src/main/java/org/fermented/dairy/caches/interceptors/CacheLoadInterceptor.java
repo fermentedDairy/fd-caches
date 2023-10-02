@@ -22,10 +22,8 @@ public class CacheLoadInterceptor extends AbstractCacheInterceptor {
      * Can be used with the {@link CacheLoad} annotation (using parameters for the keys) to update a value in cache.
      *
      * @param ctx the invocation context.
-     *
      * @return The result from the cache load. This will either be the result returned by the
      *      {@code ctx.proceed()} function call or the value held in the cache.
-     *
      * @throws Exception Exception thrown by the caching implementation or the target method.
      */
     @AroundInvoke

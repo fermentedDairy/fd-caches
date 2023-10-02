@@ -7,4 +7,7 @@ module fd.caches.cdi {
     requires jakarta.cdi;
     requires fd.caches.api;
     requires microprofile.config.api;
+    requires org.apache.commons.lang3;
+
+    opens org.fermented.dairy.caches.interceptors to org.apache.commons.lang3;
 }

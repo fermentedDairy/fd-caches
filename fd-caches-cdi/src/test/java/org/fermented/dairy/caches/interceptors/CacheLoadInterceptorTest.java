@@ -254,7 +254,7 @@ class CacheLoadInterceptorTest {
         final Long key = 1L;
 
         final CacheInterceptorException actualException = assertThrows(CacheInterceptorException.class, () -> cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(key), 1234L, key)));
-        assertEquals("No parameter is on annotated with the 'CacheKey' annotation for method defaultLoad in class, could not determine cache key.",
+        assertEquals("No parameter is on annotated with the 'CacheKey' annotation or is a cached bean for method defaultLoad in class, could not determine cache key.",
                 actualException.getMessage());
     }
 
@@ -425,7 +425,7 @@ class CacheLoadInterceptorTest {
         final Method interceptedMethod = CacheBean.class.getMethod("defaultOptionalLoad", Long.class, Long.class);
 
         final CacheInterceptorException actualException = assertThrows(CacheInterceptorException.class, () -> cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L), 1234L, 1L)));
-        assertEquals("No parameter is on annotated with the 'CacheKey' annotation for method defaultOptionalLoad in class, could not determine cache key.",
+        assertEquals("No parameter is on annotated with the 'CacheKey' annotation or is a cached bean for method defaultOptionalLoad in class, could not determine cache key.",
                 actualException.getMessage());
     }
 

@@ -2,10 +2,13 @@ package org.fermented.dairy.caches.interceptors.entities;
 
 import java.util.Objects;
 import org.fermented.dairy.caches.interceptors.annotations.CacheKey;
+import org.fermented.dairy.caches.interceptors.annotations.Cached;
 
 /**
  * Entity to test default provider caching
  */
+@SuppressWarnings("MissingJavadoc")
+@Cached
 public class DefaultCacheEntityClass {
 
     @CacheKey

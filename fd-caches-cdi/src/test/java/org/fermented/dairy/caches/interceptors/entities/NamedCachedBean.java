@@ -1,10 +1,15 @@
 package org.fermented.dairy.caches.interceptors.entities;
 
 import java.util.Objects;
+
+import org.fermented.dairy.caches.interceptors.annotations.CacheKey;
 import org.fermented.dairy.caches.interceptors.annotations.Cached;
 
+@SuppressWarnings("MissingJavadoc")
 @Cached(cacheProviderName = "cache1", cacheName = "overriddenCacheName", ttlMilliSeconds = 10)
 public class NamedCachedBean {
+
+    @CacheKey
     private final long id;
 
     public NamedCachedBean(final long id) {

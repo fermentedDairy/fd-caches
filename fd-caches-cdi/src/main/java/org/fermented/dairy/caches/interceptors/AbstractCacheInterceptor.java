@@ -4,8 +4,9 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -75,8 +76,8 @@ public class AbstractCacheInterceptor {
         return cacheNameMap.getOrDefault(cacheName, cacheNameMap.get(defaultProviderName));
     }
 
-    protected Cache getCacheForDelete(final Method method) {
-        final Class<?> cacheClass = getCachedlassForDelete(method);
+    protected Cache getCacheForDelete(final Method method) throws CacheInterceptorException {
+        final Class<?> cacheClass = getCachedClassForDelete(method);
 
         final Optional<String> cacheProviderConfig = config.getOptionalValue(
                 CONFIG_TEMPLATE.formatted(cacheClass.getCanonicalName(), "cacheprovider"), String.class);
@@ -94,18 +95,25 @@ public class AbstractCacheInterceptor {
         return cacheNameMap.getOrDefault(cacheName, cacheNameMap.get(defaultProviderName));
     }
 
-    private static Class<?> getCachedlassForDelete(final Method method) {
+    private static Class<?> getCachedClassForDelete(final Method method) throws CacheInterceptorException {
         final Class<?> cacheClass = Objects.requireNonNullElseGet(
                 method.getAnnotation(CacheDelete.class),
                 () -> {
                     throw new CacheInterceptorRuntimeException("CacheDelete annotation must be present"); //hack for throw if null
                 }).cacheClass();
         if (cacheClass.equals(Void.class)) {
-            throw new CacheInterceptorRuntimeException("CacheDelete annotation must be present");
+            return cachedBeanFromArguments(method);
         }
         return cacheClass;
     }
 
+    private static Class<?> cachedBeanFromArguments(final Method method) throws CacheInterceptorException {
+
+        return Arrays.stream(method.getParameters())
+                .map(Parameter::getType)
+                .filter(klass -> klass.isAnnotationPresent(Cached.class))
+                .findFirst().orElseThrow(() -> new CacheInterceptorException("Could not determine cached class for method %s", method.getName()));
+    }
 
     protected Class<?> getActualReturnedClass(final Method method) {
         if (method.getReturnType().isAssignableFrom(Optional.class)) {
@@ -147,9 +155,9 @@ public class AbstractCacheInterceptor {
                 .orElse(returnType.getCanonicalName());
     }
 
-    protected String getCacheNameForDelete(final Method method) {
+    protected String getCacheNameForDelete(final Method method) throws CacheInterceptorException {
 
-        final Class<?> cachedClass = getCachedlassForDelete(method);
+        final Class<?> cachedClass = getCachedClassForDelete(method);
         final Optional<String> cacheNameConfig = config.getOptionalValue(
                 CONFIG_TEMPLATE.formatted(cachedClass.getCanonicalName(), "cachename"), String.class);
         if (cacheNameConfig.isPresent()) {
@@ -195,18 +203,16 @@ public class AbstractCacheInterceptor {
             return params[0];
         }
 
-        final Annotation[][] paramAnnotations = method.getParameterAnnotations();
-        for (int paramIndex = 0; paramIndex < paramAnnotations.length; paramIndex++) {
-            for (final Annotation annotation : paramAnnotations[paramIndex]) {
-                if (annotation.annotationType().isAssignableFrom(CacheKey.class)) {
-                    return params[paramIndex];
-                }
+        final Parameter[] parameters = method.getParameters();
+        for (int paramIndex = 0; paramIndex < parameters.length; paramIndex++) {
+            if (parameters[paramIndex].isAnnotationPresent(CacheKey.class) || parameters[paramIndex].getType().isAnnotationPresent(Cached.class)) {
+                return params[paramIndex];
             }
         }
         throw new CacheInterceptorException(
-                "No parameter is on annotated with the 'CacheKey' annotation for method %s in class, could not determine cache key.",
-                method.getName(),
-                method.getDeclaringClass().getCanonicalName());
+                "No parameter is on annotated with the 'CacheKey' annotation or is a cached bean for method %s in class,"
+                + " could not determine cache key.",
+                method.getName());
     }
 
     protected boolean isCacheDisabled(final Method method) {

@@ -1,5 +1,8 @@
 package org.fermented.dairy.caches.interceptors;
 
+import static org.fermented.dairy.caches.interceptors.PriorityValues.LOAD_INTERCEPTOR_PRIORITY;
+
+import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
@@ -9,12 +12,14 @@ import java.util.Optional;
 import org.fermented.dairy.caches.interceptors.annotations.CacheLoad;
 import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorException;
 
+
 /**
  * CDI caching interceptor.
  */
 @Interceptor
 @CacheLoad
 @Dependent
+@Priority(LOAD_INTERCEPTOR_PRIORITY)
 public class CacheLoadInterceptor extends AbstractCacheInterceptor {
 
     /**

@@ -20,5 +20,16 @@ jobs:
         repository: fermentedDairy/fd-devOps
         path: devops
 
-    - name: Build inside docker
-      run:  docker build . -f devops/DockerBuild
+    - uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        cache: 'maven'
+
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: 3.9.4
+
+    - name: Build with maven
+      run:  mvn -B package verify -s devops/settings.xml

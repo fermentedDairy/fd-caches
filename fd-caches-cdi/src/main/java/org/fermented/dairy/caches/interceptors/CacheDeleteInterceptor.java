@@ -1,5 +1,7 @@
 package org.fermented.dairy.caches.interceptors;
 
+import static org.fermented.dairy.caches.interceptors.PriorityValues.DELETE_INTERCEPTOR_PRIORITY;
+
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.interceptor.AroundInvoke;
@@ -26,7 +28,7 @@ import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorExcept
 @Interceptor
 @CacheDelete
 @Dependent
-@Priority(Integer.MAX_VALUE - 1)
+@Priority(DELETE_INTERCEPTOR_PRIORITY)
 public class CacheDeleteInterceptor extends AbstractCacheInterceptor {
 
     /**

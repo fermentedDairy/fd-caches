@@ -20,5 +20,13 @@ jobs:
         repository: fermentedDairy/fd-devOps
         path: devops
 
+    - uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        cache: 'maven'
+    - name: Build with Maven
+      run: mvn -B dependency:resolve --file pom.xml
+
     - name: Build inside docker
       run:  docker build . -f devops/DockerBuild

@@ -31,5 +31,8 @@ jobs:
       with:
         maven-version: 3.9.4
 
+    - name: Pull microshed testcontainer dependency
+      run: docker pull testcontainers/ryuk:0.3.0
+
     - name: Build with maven
       run:  mvn -B package verify -s devops/settings.xml

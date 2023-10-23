@@ -18,7 +18,7 @@ import org.fermented.dairy.caches.api.interfaces.Cache;
  *
  * @noinspection rawtypes
  */
-public final class HashMapCache implements Cache {
+public class HashMapCache implements Cache {
 
     private static final ConcurrentHashMap<String, CacheHolder> CACHES = new ConcurrentHashMap<>(); //NOSONAR: java3740
 
@@ -189,6 +189,19 @@ public final class HashMapCache implements Cache {
     @Override
     public String getProviderName() {
         return "internal.default.cache";
+    }
+
+    @Override
+    public Optional<Object> peek(final String cacheName, final Object key) {
+        final CacheHolder cache;
+        final SoftReference<CacheEntry> cacheReference;
+        final CacheEntry cacheEntry;
+
+        if ((cache = CACHES.get(cacheName)) == null
+                || (cacheReference = cache.cache().get(key)) == null
+                || (cacheEntry = cacheReference.get()) == null)
+            return Optional.empty();
+        return Optional.of(cacheEntry.getValue());
     }
 
     private static final class CacheEntry extends ReentrantReadWriteLock {

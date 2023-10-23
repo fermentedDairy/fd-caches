@@ -4,11 +4,16 @@ import static org.fermented.dairy.caches.interceptors.PriorityValues.LOAD_INTERC
 
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 import java.lang.reflect.Method;
 import java.util.Optional;
+
+import org.eclipse.microprofile.config.Config;
+import org.fermented.dairy.caches.api.interfaces.Cache;
 import org.fermented.dairy.caches.interceptors.annotations.CacheLoad;
 import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorException;
 
@@ -21,6 +26,11 @@ import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorExcept
 @Dependent
 @Priority(LOAD_INTERCEPTOR_PRIORITY)
 public class CacheLoadInterceptor extends AbstractCacheInterceptor {
+
+    @Inject
+    public CacheLoadInterceptor(final Config config, final Instance<Cache> providers) {
+        super(config, providers);
+    }
 
     /**
      * Interceptor method invoked around the target method (annotated with {@link CacheLoad}).

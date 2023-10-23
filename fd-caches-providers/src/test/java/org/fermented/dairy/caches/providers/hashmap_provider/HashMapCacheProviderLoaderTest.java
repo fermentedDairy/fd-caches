@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -31,6 +32,7 @@ class HashMapCacheProviderLoaderTest {
             with an empty cache
              given an initial load (non-optional)
              then second load should return the result of the first load
+             and peek should return cached object
              (load cache miss followed by cache hit)
             """)
     @Test
@@ -42,6 +44,11 @@ class HashMapCacheProviderLoaderTest {
         assertAll("assert load results and cache state",
                 () -> assertEquals(firstLoader.load(1L), result1),
                 () -> assertEquals(firstLoader.load(1L), result2),
+                () -> {
+                    final Optional<?> peaked = provider.peek("NumberCache", 1L);
+                    assertTrue(peaked.isPresent());
+                    assertEquals(firstLoader.load(1L), peaked.get());
+                },
                 () -> assertEquals(Set.of("NumberCache"), provider.getCacheNames()),
                 () -> assertEquals(Set.of(1L), provider.getKeys("NumberCache")));
     }

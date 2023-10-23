@@ -14,8 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.commons.lang3.reflect.MethodUtils;
+
 import org.eclipse.microprofile.config.Config;
 import org.fermented.dairy.caches.api.functions.Loader;
 import org.fermented.dairy.caches.api.functions.OptionalLoader;
@@ -29,14 +28,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class CacheLoadInterceptorTest {
 
-    @InjectMocks
     CacheLoadInterceptor cacheLoadInterceptor;
 
     @Mock
@@ -58,11 +55,10 @@ class CacheLoadInterceptorTest {
 
     @BeforeEach
     void init() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        initInjectedProperties();
         initInjectedCacheInstances();
     }
 
-    void initInjectedCacheInstances() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    void initInjectedCacheInstances() {
         cacheInstances = List.of(
                 cache1, cache2, defaultCache
         );
@@ -71,17 +67,11 @@ class CacheLoadInterceptorTest {
         lenient().when(cache2.getProviderName()).thenReturn("cache2");
         lenient().when(providers.iterator()).thenReturn(cacheInstances.iterator());
         lenient().when(providers.stream()).thenReturn(cacheInstances.stream());
-        MethodUtils.invokeMethod(cacheLoadInterceptor, true, "init");
-    }
-
-    void initInjectedProperties() throws IllegalAccessException {
-        FieldUtils.writeField(cacheLoadInterceptor, "defaultProviderName", "default", true);
-        FieldUtils.writeField(cacheLoadInterceptor, "defaultTtl", 3000, true);
-    }
-
-    @BeforeEach
-    void initManuallyFetchedProperties() {
-
+        lenient().when(config.getOptionalValue("fd.caches.ttl.default", String.class))
+                .thenReturn(Optional.of("default"));
+        lenient().when(config.getOptionalValue("fd.caches.provider.default", Long.class))
+                .thenReturn(Optional.of(3000L));
+        cacheLoadInterceptor = new CacheLoadInterceptor(config, providers);
     }
 
     @DisplayName("""

@@ -18,21 +18,23 @@
             <version>${parent.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.fermented.dairy.caches</groupId>
+            <artifactId>fd-caches-providers</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+        <dependency>
             <groupId>jakarta.interceptor</groupId>
             <artifactId>jakarta.interceptor-api</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>jakarta.enterprise</groupId>
             <artifactId>jakarta.enterprise.cdi-api</artifactId>
             <version>4.0.1</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.microprofile.config</groupId>
             <artifactId>microprofile-config-api</artifactId>
             <version>3.0.3</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -73,6 +75,7 @@
                 <configuration>
                     <excludes>
                         <exclude>org/fermented/dairy/caches/interceptors/exceptions/**</exclude>
+                        <exclude>org/fermented/dairy/caches/interceptors/injectors/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>

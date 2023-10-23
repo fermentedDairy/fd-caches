@@ -1,6 +1,5 @@
 package org.fermented.dairy.caches.interceptors;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -8,17 +7,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.eclipse.microprofile.config.Config;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.fermented.dairy.caches.api.interfaces.Cache;
-import org.fermented.dairy.caches.interceptors.annotations.CacheDelete;
 import org.fermented.dairy.caches.interceptors.annotations.CacheKey;
-import org.fermented.dairy.caches.interceptors.annotations.CacheLoad;
 import org.fermented.dairy.caches.interceptors.annotations.Cached;
+import org.fermented.dairy.caches.interceptors.annotations.CachedType;
 import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorException;
 import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorRuntimeException;
 
@@ -31,32 +27,41 @@ public class AbstractCacheInterceptor {
 
     private static final String CONFIG_TEMPLATE = "fd.config.cache.%s.%s";
 
-    @Inject
-    @ConfigProperty(name = "fd.caches.provider.default", defaultValue = "internal.default.cache")
-    private String defaultProviderName;
+    private static final long ONE_HOUR_IN_MILLIS = 60L * 60L * 1000L; //60 minutes * 60 seconds * 1000
 
-    @Inject
-    @ConfigProperty(name = "fd.caches.ttl.default", defaultValue = "3000")
-    private long defaultTtl;
+    private final String defaultProviderName;
 
-    @Inject
-    private Config config;
+    private final long defaultTtl;
 
-    @Inject
-    private Instance<Cache> providers;
+    private final Config config;
+
+    private final Instance<Cache> providers;
 
     private Map<String, Cache> cacheNameMap;
 
+    @Inject
+    public AbstractCacheInterceptor(
+            final Config config,
+            final Instance<Cache> providers) {
+        this.defaultProviderName = config
+                .getOptionalValue("fd.caches.ttl.default", String.class)
+                .orElse("internal.default.cache");
+        this.defaultTtl = config
+                .getOptionalValue("fd.caches.provider.default", Long.class)
+                .orElse(ONE_HOUR_IN_MILLIS);
+        this.config = config;
+        this.providers = providers;
+        initCacheNameMap();
+    }
+
     protected static Class<?> getCachedClassForDelete(final Method method) throws CacheInterceptorException {
-        final Class<?> cacheClass = Objects.requireNonNullElseGet(
-                method.getAnnotation(CacheDelete.class),
-                () -> {
-                    throw new CacheInterceptorRuntimeException("CacheDelete annotation must be present"); //hack for throw if null
-                }).cacheClass();
-        if (cacheClass.equals(Void.class)) {
+
+        final CachedType cachedTypeAnnotation = method.getAnnotation(CachedType.class);
+        if (cachedTypeAnnotation != null) {
+            return cachedTypeAnnotation.value();
+        } else {
             return cachedBeanFromArguments(method);
         }
-        return cacheClass;
     }
 
     protected static Class<?> cachedBeanFromArguments(final Method method) throws CacheInterceptorException {
@@ -106,7 +111,11 @@ public class AbstractCacheInterceptor {
 
     protected Class<?> getActualReturnedClass(final Method method) {
         if (method.getReturnType().isAssignableFrom(Optional.class)) {
-            return method.getAnnotation(CacheLoad.class).optionalClass();
+            CachedType cachedTypeAnnotation;
+            if ((cachedTypeAnnotation = method.getAnnotation(CachedType.class)) == null) {
+                throw new CacheInterceptorRuntimeException("%s returns an optional and must be annotated with 'CachedType'".formatted(method.getName()));
+            }
+            return cachedTypeAnnotation.value();
         } else {
             return method.getReturnType();
         }
@@ -184,8 +193,7 @@ public class AbstractCacheInterceptor {
         return getCacheNameFromConfig(method, cachedClass);
     }
 
-    @PostConstruct
-    private void init() {
+    private void initCacheNameMap() {
         cacheNameMap = providers.stream().collect(Collectors.toMap(
                 Cache::getProviderName,
                 Function.identity()
@@ -199,12 +207,12 @@ public class AbstractCacheInterceptor {
     private static Optional<Cached> getCachedAnnotation(final Class<?> returnType, final Method method) {
         final Optional<Cached> optionalCachedAnnotation;
         if (returnType.isAssignableFrom(Optional.class)) {
-            final CacheLoad cacheLoadAnnotation = method.getAnnotation(CacheLoad.class);
-            if (cacheLoadAnnotation == null) {
-                throw new CacheInterceptorRuntimeException("CacheLoad annotation must be present on the intercepted method");
+            final CachedType cachedTypeAnnotation = method.getAnnotation(CachedType.class);
+            if (cachedTypeAnnotation == null) {
+                throw new CacheInterceptorRuntimeException("CachedType annotation must be present when returning Optionals");
             }
             optionalCachedAnnotation = Optional.ofNullable(
-                    cacheLoadAnnotation.optionalClass().getAnnotation(Cached.class)
+                    cachedTypeAnnotation.value().getAnnotation(Cached.class)
             );
         } else {
             optionalCachedAnnotation = Optional.ofNullable(

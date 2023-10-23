@@ -10,16 +10,8 @@ import java.lang.annotation.Target;
  * Indicates that the annotated method should remove the entry mapped by the key from the cache.
  * This should be used when deleting the entity from the underlying source.
  */
-@SuppressWarnings("rawtypes")
 @InterceptorBinding
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CacheDelete {
-
-    /**
-     * The cached classes Class Object. Used to direct the cache delete to the correct cache.
-     *
-     * @return The Class Object
-     */
-    Class cacheClass() default Void.class;
 }

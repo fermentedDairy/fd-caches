@@ -40,17 +40,22 @@ class HashMapCacheProviderOptionalLoaderTest {
                 "Number Loaded Into Cache: " + key);
         final OptionalLoader<Object, Object> secondLoader = key -> Optional.of(
                 "Number Should Come From Cache: " + key);
-        final Optional result1 = provider.loadOptional(1L, firstLoader, "NumberCache", 3000, Long.class, String.class);
-        final Optional result2 = provider.loadOptional(1L, secondLoader, "NumberCache", 3000, Long.class, String.class);
+        final Optional<?> result1 = provider.loadOptional(1L, firstLoader, "NumberCache", 3000, Long.class, String.class);
+        final Optional<?> result2 = provider.loadOptional(1L, secondLoader, "NumberCache", 3000, Long.class, String.class);
         assertAll("assert load results and cache state",
                 () -> assertEquals(firstLoader.load(1L), result1),
                 () -> assertEquals(firstLoader.load(1L), result2),
+                () -> {
+                    final Optional<?> peaked = provider.peek("NumberCache", 1L);
+                    assertTrue(peaked.isPresent());
+                    assertEquals(firstLoader.load(1L).get(), peaked.get());
+                },
                 () -> assertEquals(Set.of("NumberCache"), provider.getCacheNames()),
                 () -> assertEquals(Set.of(1L), provider.getKeys("NumberCache")));
     }
 
     @DisplayName("""
-            with an empty cache  
+            with an empty cache
              given an initial load (optional)
              then second load (non-optional) should return the result of the first load
              (load cache miss followed by cache hit (common cache name)
@@ -60,7 +65,7 @@ class HashMapCacheProviderOptionalLoaderTest {
         final OptionalLoader<Object, Object> firstLoader = key -> Optional.of(
                 "Number Loaded Into Cache: " + key);
         final Loader<Object, Object> secondLoader = key -> "Number Should Come From Cache: " + key;
-        final Optional result1 = provider.loadOptional(1L, firstLoader, "NumberCache", 3000, Long.class, String.class);
+        final Optional<?> result1 = provider.loadOptional(1L, firstLoader, "NumberCache", 3000, Long.class, String.class);
         final String result2 = (String) provider.load(1L, secondLoader, "NumberCache", 3000, Long.class, String.class);
         assertAll("assert load results and cache state",
                 () -> assertEquals(firstLoader.load(1L), result1),
@@ -78,7 +83,7 @@ class HashMapCacheProviderOptionalLoaderTest {
     @Test
     void cacheMissOptionalFromLoader() throws Exception {
         final OptionalLoader<Object, Object> firstLoader = key -> Optional.empty();
-        final Optional result = provider.loadOptional(1L, firstLoader, "NumberCache", 3000, Long.class, String.class);
+        final Optional<?> result = provider.loadOptional(1L, firstLoader, "NumberCache", 3000, Long.class, String.class);
         assertAll("assert load results and cache state",
                 () -> assertTrue(result.isEmpty()),
                 () -> assertEquals(Set.of("NumberCache"), provider.getCacheNames()),
@@ -94,7 +99,7 @@ class HashMapCacheProviderOptionalLoaderTest {
     @Test
     void cacheMissNullFromLoader() throws Exception {
         final OptionalLoader<Object, Object> firstLoader = key -> null;
-        final Optional result = provider.loadOptional(1L, firstLoader, "NumberCache", 3000, Long.class, String.class);
+        final Optional<?> result = provider.loadOptional(1L, firstLoader, "NumberCache", 3000, Long.class, String.class);
         assertAll("assert load results and cache state",
                 () -> assertTrue(result.isEmpty()),
                 () -> assertEquals(Set.of("NumberCache"), provider.getCacheNames()),
@@ -113,13 +118,13 @@ class HashMapCacheProviderOptionalLoaderTest {
                 Optional.of("Number Loaded Into Cache: " + key);
         final OptionalLoader<Object, Object> secondLoader = key ->
                 Optional.of("Number Should Come From Cache: " + key);
-        final Optional result1 = provider.loadOptional(1L, firstLoader, "NumberCache", 30, Long.class, String.class);
+        final Optional<?> result1 = provider.loadOptional(1L, firstLoader, "NumberCache", 30, Long.class, String.class);
         assertAll("assert initial load results and cache state",
                 () -> assertEquals(firstLoader.load(1L), result1),
                 () -> assertEquals(Set.of("NumberCache"), provider.getCacheNames()),
                 () -> assertEquals(Set.of(1L), provider.getKeys("NumberCache")));
         Thread.sleep(50L); //NOSONAR: TODO: is there a better way?
-        final Optional result2 = provider.loadOptional(1L, secondLoader, "NumberCache", 3000, Long.class, String.class);
+        final Optional<?> result2 = provider.loadOptional(1L, secondLoader, "NumberCache", 3000, Long.class, String.class);
         assertAll("assert load results and cache state",
                 () -> assertEquals(secondLoader.load(1L), result2),
                 () -> assertEquals(Set.of("NumberCache"), provider.getCacheNames()),
@@ -136,7 +141,7 @@ class HashMapCacheProviderOptionalLoaderTest {
     void cacheMissFollowedByCacheHitExpiryOnStateInterrogation() throws Exception {
         final OptionalLoader<Object, Object> firstLoader = key -> Optional.of(
                 "Number Loaded Into Cache: " + key);
-        final Optional result1 = provider.loadOptional(1L, firstLoader, "NumberCache", 30, Long.class, String.class);
+        final Optional<?> result1 = provider.loadOptional(1L, firstLoader, "NumberCache", 30, Long.class, String.class);
         assertAll("assert initial load results and cache state",
                 () -> assertEquals(firstLoader.load(1L), result1),
                 () -> assertEquals(Set.of("NumberCache"), provider.getCacheNames()),
@@ -188,11 +193,11 @@ class HashMapCacheProviderOptionalLoaderTest {
         final OptionalLoader<Object, Object> secondLoader = key -> Optional.of(
                 "Number Should Come From Cache: " + key);
 
-        final Future<Optional> futureResult1 = Executors.newSingleThreadExecutor().submit(
+        final Future<Optional<?>> futureResult1 = Executors.newSingleThreadExecutor().submit(
                 () -> provider.loadOptional(1L, firstLoader, "NumberCache", 3000, Long.class, String.class));
         Thread.sleep(50L); ///NOSONAR: TODO: Is there a better way?
-        final Optional result2 = provider.loadOptional(1L, secondLoader, "NumberCache", 3000, Long.class, String.class);
-        final Optional result1 = futureResult1.get();
+        final Optional<?> result2 = provider.loadOptional(1L, secondLoader, "NumberCache", 3000, Long.class, String.class);
+        final Optional<?> result1 = futureResult1.get();
         assertAll("assert load results and cache state",
                 () -> assertEquals(firstLoader.load(1L), result1),
                 () -> assertEquals(firstLoader.load(1L), result2),

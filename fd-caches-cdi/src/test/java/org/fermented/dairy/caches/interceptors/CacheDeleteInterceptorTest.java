@@ -1,8 +1,6 @@
 package org.fermented.dairy.caches.interceptors;
 
 import jakarta.enterprise.inject.Instance;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.eclipse.microprofile.config.Config;
 import org.fermented.dairy.caches.api.interfaces.Cache;
 import org.fermented.dairy.caches.interceptors.beans.CacheBean;
@@ -15,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -30,7 +27,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class CacheDeleteInterceptorTest {
 
-    @InjectMocks
     CacheDeleteInterceptor cacheDeleteInterceptor;
 
     @Mock
@@ -52,7 +48,6 @@ class CacheDeleteInterceptorTest {
 
     @BeforeEach
     void init() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        initInjectedProperties();
         initInjectedCacheInstances();
     }
 
@@ -65,12 +60,11 @@ class CacheDeleteInterceptorTest {
         lenient().when(cache2.getProviderName()).thenReturn("cache2");
         lenient().when(providers.iterator()).thenReturn(cacheInstances.iterator());
         lenient().when(providers.stream()).thenReturn(cacheInstances.stream());
-        MethodUtils.invokeMethod(cacheDeleteInterceptor, true, "init");
-    }
-
-    void initInjectedProperties() throws IllegalAccessException {
-        FieldUtils.writeField(cacheDeleteInterceptor, "defaultProviderName", "default", true);
-        FieldUtils.writeField(cacheDeleteInterceptor, "defaultTtl", 3000, true);
+        lenient().when(config.getOptionalValue("fd.caches.ttl.default", String.class))
+                .thenReturn(Optional.of("default"));
+        lenient().when(config.getOptionalValue("fd.caches.provider.default", Long.class))
+                .thenReturn(Optional.of(3000L));
+        cacheDeleteInterceptor = new CacheDeleteInterceptor(config, providers);
     }
 
     @DisplayName("""

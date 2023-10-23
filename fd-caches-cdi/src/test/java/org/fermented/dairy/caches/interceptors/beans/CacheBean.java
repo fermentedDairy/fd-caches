@@ -4,6 +4,7 @@ import java.util.Optional;
 import org.fermented.dairy.caches.interceptors.annotations.CacheDelete;
 import org.fermented.dairy.caches.interceptors.annotations.CacheKey;
 import org.fermented.dairy.caches.interceptors.annotations.CacheLoad;
+import org.fermented.dairy.caches.interceptors.annotations.CachedType;
 import org.fermented.dairy.caches.interceptors.entities.CacheRecord;
 import org.fermented.dairy.caches.interceptors.entities.DefaultCacheEntityClass;
 import org.fermented.dairy.caches.interceptors.entities.NamedCachedBean;
@@ -31,22 +32,26 @@ public class CacheBean {
         return new DefaultCacheEntityClass(param);
     }
 
-    @CacheLoad(optionalClass = DefaultCacheEntityClass.class)
+    @CacheLoad
+    @CachedType(DefaultCacheEntityClass.class)
     public Optional<DefaultCacheEntityClass> defaultOptionalLoad(final Long param){
         return Optional.of(new DefaultCacheEntityClass(param));
     }
 
-    @CacheLoad(optionalClass = NamedCachedBean.class)
+    @CacheLoad
+    @CachedType(NamedCachedBean.class)
     public Optional<NamedCachedBean> namedOptionalLoad(final Long param){
         return Optional.of(new NamedCachedBean(param));
     }
 
-    @CacheLoad(optionalClass = DefaultCacheEntityClass.class)
+    @CacheLoad
+    @CachedType(DefaultCacheEntityClass.class)
     public Optional<DefaultCacheEntityClass> defaultOptionalLoad(final Object ignoredDummy, @CacheKey final Long param){
         return Optional.of(new DefaultCacheEntityClass(param));
     }
 
-    @CacheLoad(optionalClass = DefaultCacheEntityClass.class)
+    @CacheLoad
+    @CachedType(DefaultCacheEntityClass.class)
     public Optional<DefaultCacheEntityClass> defaultOptionalLoad(final Long ignoredDummy, final Long param){
         return Optional.of(new DefaultCacheEntityClass(param));
     }
@@ -62,42 +67,50 @@ public class CacheBean {
         //No Op
     }
 
-    @CacheDelete(cacheClass = DefaultCacheEntityClass.class)
+    @CacheDelete
+    @CachedType(DefaultCacheEntityClass.class)
     public DefaultCacheEntityClass deleteDefault(Long key) {
         return null;
     }
 
-    @CacheDelete(cacheClass = DefaultCacheEntityClass.class)
+    @CacheDelete
+    @CachedType(DefaultCacheEntityClass.class)
     public DefaultCacheEntityClass deleteDefault(Object ignoredDummy, @CacheKey Long key) {
         return null;
     }
 
-    @CacheDelete(cacheClass = DefaultCacheEntityClass.class)
+    @CacheDelete
+    @CachedType(DefaultCacheEntityClass.class)
     public DefaultCacheEntityClass deleteDefault(Long ignoredDummy, Long key) {
         return null;
     }
 
-    @CacheDelete(cacheClass = NamedCachedBean.class)
+    @CacheDelete
+    @CachedType(NamedCachedBean.class)
     public NamedCachedBean deleteNamed(Long key) {
         return null;
     }
 
-    @CacheDelete(cacheClass = NamedCachedBean.class)
+    @CacheDelete
+    @CachedType(NamedCachedBean.class)
     public NamedCachedBean deleteNamed(Object ignoredDummy, @CacheKey Long key) {
         return null;
     }
 
-    @CacheDelete(cacheClass = NamedCachedBean.class)
+    @CacheDelete
+    @CachedType(NamedCachedBean.class)
     public NamedCachedBean deleteNamed(Long ignoredDummy, Long key) {
         return null;
     }
 
     @CacheDelete
+    @CachedType(DefaultCacheEntityClass.class)
     public DefaultCacheEntityClass deleteDefault(DefaultCacheEntityClass toDelete) {
         return null;
     }
 
     @CacheDelete
+    @CachedType(DefaultCacheEntityClass.class)
     public DefaultCacheEntityClass deleteDefault(Long ignoredDummy, DefaultCacheEntityClass toDelete) {
         return null;
     }

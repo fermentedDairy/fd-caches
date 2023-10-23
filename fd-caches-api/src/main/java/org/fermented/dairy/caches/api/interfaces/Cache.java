@@ -124,4 +124,13 @@ public interface Cache {
         return getClass().getCanonicalName();
     }
 
+    /**
+     * Direct access to cached objects.
+     *
+     * @param cacheName The cache name
+     * @param key the cache key
+     * @return the cached object. Optional.empty() if not found
+     */
+    Optional<Object> peek(String cacheName, Object key);
+
 }

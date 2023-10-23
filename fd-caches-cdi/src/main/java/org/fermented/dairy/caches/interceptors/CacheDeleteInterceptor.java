@@ -4,6 +4,8 @@ import static org.fermented.dairy.caches.interceptors.PriorityValues.DELETE_INTE
 
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
@@ -13,6 +15,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.microprofile.config.Config;
 import org.fermented.dairy.caches.api.interfaces.Cache;
 import org.fermented.dairy.caches.interceptors.annotations.CacheDelete;
 import org.fermented.dairy.caches.interceptors.annotations.CacheKey;
@@ -30,6 +33,12 @@ import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorExcept
 @Dependent
 @Priority(DELETE_INTERCEPTOR_PRIORITY)
 public class CacheDeleteInterceptor extends AbstractCacheInterceptor {
+
+    @Inject
+    public CacheDeleteInterceptor(final Config config, final Instance<Cache> providers) {
+        super(config, providers);
+    }
+
 
     /**
      * Interceptor method invoked around the target method (annotated with {@link CacheDelete}).

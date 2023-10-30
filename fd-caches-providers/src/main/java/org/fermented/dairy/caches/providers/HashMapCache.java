@@ -61,10 +61,10 @@ public class HashMapCache implements Cache {
     public Object load(final Object key,
                        final Object value,
                        final String cacheName,
-                       final long ttlMillieSeconds,
+                       final long ttlMilliSeconds,
                        final Class keyClass,
                        final Class valueClass) throws Exception {
-        return load(key, k -> value, cacheName, ttlMillieSeconds, keyClass, valueClass);
+        return load(key, k -> value, cacheName, ttlMilliSeconds, keyClass, valueClass);
     }
 
     @Override
@@ -115,10 +115,10 @@ public class HashMapCache implements Cache {
     }
 
     @Override
-    public Collection<Object> getKeys(final String cacheNames) {
+    public Collection<Object> getKeys(final String cacheName) {
         final CacheHolder cacheHolder;
 
-        if ((cacheHolder = CACHES.get(cacheNames)) == null) {
+        if ((cacheHolder = CACHES.get(cacheName)) == null) {
             return Collections.emptySet();
         }
 

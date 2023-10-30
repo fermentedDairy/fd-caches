@@ -24,6 +24,8 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema;
+import org.fermented.dairy.caches.interceptors.annotations.CacheDelete;
+import org.fermented.dairy.caches.interceptors.annotations.CachedType;
 import org.fermented.dairy.caches.rest.controller.DataService;
 import org.fermented.dairy.caches.rest.entity.records.ConfigOverriddenCacheRecord;
 import org.fermented.dairy.caches.rest.entity.records.DefaultCacheRecord;
@@ -40,6 +42,8 @@ import org.fermented.dairy.caches.rest.entity.rto.data.PutRecordResponse;
 public class DataRestService {
 
     public static final String DEFAULT_ID_PATH = "default/{id}";
+
+    public static final String NAMED_ID_PATH = "named/{id}";
 
     @Inject
     private DataService dataService;
@@ -87,28 +91,30 @@ public class DataRestService {
         return dataService.getDefault(id).orElseThrow(() -> new NotFoundException("No DefaultCacheRecord with id %s found".formatted(id)));
     }
 
-    @DELETE
-    @Path(DEFAULT_ID_PATH)
-    public DeleteRecordResponse deleteDefault(@PathParam("id") final String id) {
-        throw new NotFoundException("DeleteRecordResponse with id %s not found".formatted(id));
-    }
-
     @PUT
     @Path("/named")
     public PutRecordResponse addNamed(@NotNull final NamedCacheRecord cacheRecord) {
-        return null;
+        dataService.addNamedCacheRecord(cacheRecord);
+        return PutRecordResponse.builder()
+                .id(cacheRecord.id())
+                .link(
+                        Link.builder()
+                                .rel("named")
+                                .href(StringSubstitutor.replace(
+                                        generateURLfromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, NAMED_ID_PATH),
+                                        Map.of("id", cacheRecord.id()),
+                                        "{", "}"))
+                                .type("GET")
+                                .build()
+                )
+                .build();
     }
 
     @GET
-    @Path("/named/{id}")
-    public NamedCacheRecord getNamed(@PathParam("id") final String id) {
-        throw new NotFoundException("NamedCacheRecord with id: %s not found".formatted(id));
-    }
-
-    @DELETE
-    @Path("/named/{id}")
-    public DeleteRecordResponse deleteNamed(@PathParam("id") final String id) {
-        throw new NotFoundException("NamedCacheRecord with id %s not found".formatted(id));
+    @Path(NAMED_ID_PATH)
+    public NamedCacheRecord getNamed(@PathParam("id") final UUID id) {
+        return dataService.getNamedCacheRecord(id)
+                .orElseThrow(() -> new NotFoundException("No NamedCacheRecord with id %s found".formatted(id)));
     }
 
     @PUT

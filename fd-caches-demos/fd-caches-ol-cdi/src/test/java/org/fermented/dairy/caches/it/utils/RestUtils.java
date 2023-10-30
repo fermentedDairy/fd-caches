@@ -58,6 +58,28 @@ public class RestUtils {
     }
 
     @SneakyThrows
+    public static <B, T> void validateDelete(final HttpClient client, final TestContext context, final String path, final B body, final T expectedResult) {
+        http().client(client)
+                .send()
+                .delete(path)
+                .message()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .body(mapper.writeValueAsString(body))
+                .build()
+                .doExecute(context);
+
+        http().client(client)
+                .receive()
+                .response(HttpStatus.OK)
+                .message()
+                .body(mapper.writeValueAsString(expectedResult))
+                .build()
+                .doExecute(context);
+
+    }
+
+    @SneakyThrows
     public static <R, T> void validatePutList(final HttpClient client, final TestContext context, final String path, final R payload, final List<T> expectedResult) {
         http().client(client)
                 .send()

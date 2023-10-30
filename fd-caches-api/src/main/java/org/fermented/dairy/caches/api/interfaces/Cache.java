@@ -44,7 +44,7 @@ public interface Cache {
      * @param key The cache key, also used as a parameter when invoking the loader function.
      * @param value The value to be placed in the cache.
      * @param cacheName The name of the cache to store the value in.
-     * @param ttlMillieSeconds The time to live (ttlMillieSeconds) before the cache expires in milliseconds.
+     * @param ttlMilliSeconds The time to live (ttlMilliSeconds) before the cache expires in milliseconds.
      * @param keyClass The Class object of the cache key.
      * @param valueClass The Class object of the value wrapped in the Optional loaded by the OptionalLoader functional interface.
      *
@@ -52,7 +52,7 @@ public interface Cache {
      *
      * @throws Exception Checked exception
      */
-    Object load(Object key, Object value, String cacheName, long ttlMillieSeconds, Class keyClass, Class valueClass) throws Exception;
+    Object load(Object key, Object value, String cacheName, long ttlMilliSeconds, Class keyClass, Class valueClass) throws Exception;
 
     /**
      * Load the value using the OptionalLoader function and stores it in the cache.
@@ -109,11 +109,11 @@ public interface Cache {
      * Gets the keys in a given cache.
      * Implementations should only include keys that are associated with values that would be considered cache hits (i.e. not expired etc.)
      *
-     * @param cacheNames The name of the cache.
+     * @param cacheName The name of the cache.
      *
      * @return collection of keys in the cache.
      */
-    Collection<Object> getKeys(String cacheNames);
+    Collection<Object> getKeys(String cacheName);
 
     /**
      * The provider name. should be unique within the classloader.

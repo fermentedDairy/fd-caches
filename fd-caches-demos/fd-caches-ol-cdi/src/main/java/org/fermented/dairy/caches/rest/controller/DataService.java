@@ -18,26 +18,32 @@ import org.fermented.dairy.caches.rest.entity.records.NamedCacheRecord;
 @ApplicationScoped
 public class DataService {
 
-    private static final Map<UUID, DefaultCacheRecord> defaultRecords = new HashMap<>();
+    private static final Map<UUID, DefaultCacheRecord> DEFAULT_RECORDS = new HashMap<>();
+
+    private static final Map<UUID, NamedCacheRecord> NAMED_RECORDS = new HashMap<>();
 
     @CacheDelete
     @CachedType(DefaultCacheRecord.class)
     public void addDefaultCacheRecord(final DefaultCacheRecord dataRecord) {
-        defaultRecords.put(dataRecord.id(), dataRecord);
+        DEFAULT_RECORDS.put(dataRecord.id(), dataRecord);
     }
 
     @CacheLoad
     @CachedType(DefaultCacheRecord.class)
     public Optional<DefaultCacheRecord> getDefault(final UUID id) {
-        return Optional.ofNullable(defaultRecords.get(id));
+        return Optional.ofNullable(DEFAULT_RECORDS.get(id));
     }
 
-    public void putNamedCacheRecord(final NamedCacheRecord dataRecord) {
-
+    @CacheDelete
+    @CachedType(NamedCacheRecord.class)
+    public void addNamedCacheRecord(final NamedCacheRecord dataRecord) {
+        NAMED_RECORDS.put(dataRecord.id(), dataRecord);
     }
 
+    @CacheLoad
+    @CachedType(NamedCacheRecord.class)
     public Optional<NamedCacheRecord> getNamedCacheRecord(final UUID id) {
-        return Optional.empty();
+        return Optional.ofNullable(NAMED_RECORDS.get(id));
     }
 
     public void putConfigOverriddenCacheRecord(final ConfigOverriddenCacheRecord dataRecord) {

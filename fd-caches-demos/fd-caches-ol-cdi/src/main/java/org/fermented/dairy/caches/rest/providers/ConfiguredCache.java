@@ -3,19 +3,25 @@ package org.fermented.dairy.caches.rest.providers;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.fermented.dairy.caches.api.functions.Loader;
 import org.fermented.dairy.caches.api.functions.OptionalLoader;
 import org.fermented.dairy.caches.api.interfaces.Cache;
 
 @ApplicationScoped
 public class ConfiguredCache implements Cache {
+
+    private static ConcurrentHashMap<KeyHolder, ValueHolder> cacheMap = new ConcurrentHashMap<>();
+
+
     @Override
     public Object load(final Object key, final Loader<Object, Object> loader, final String cacheName, final long ttlMilliSeconds, final Class keyClass, final Class valueClass) throws Exception {
         return null;
     }
 
     @Override
-    public Object load(final Object key, final Object value, final String cacheName, final long ttlMillieSeconds, final Class keyClass, final Class valueClass) throws Exception {
+    public Object load(final Object key, final Object value, final String cacheName, final long ttlMilliSeconds, final Class keyClass, final Class valueClass) throws Exception {
         return null;
     }
 
@@ -26,7 +32,7 @@ public class ConfiguredCache implements Cache {
 
     @Override
     public void purge() {
-
+        cacheMap.clear();
     }
 
     @Override
@@ -58,4 +64,8 @@ public class ConfiguredCache implements Cache {
     public Optional<Object> peek(final String cacheName, final Object key) {
         return Optional.empty();
     }
+
+    private record KeyHolder(String cacheName, Object cacheValue){}
+
+    private record ValueHolder(){}
 }

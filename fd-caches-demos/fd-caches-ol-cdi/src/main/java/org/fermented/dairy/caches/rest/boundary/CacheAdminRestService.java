@@ -5,14 +5,18 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
@@ -46,6 +50,29 @@ public class CacheAdminRestService {
             summary = "Gets a set of provider names")
     public Set<String> getProviders() {
         return caches.stream().map(Cache::getProviderName).collect(Collectors.toSet());
+    }
+
+    /**
+     * Get all cache provider names.
+     *
+     * @return provider names
+     */
+    @DELETE
+    @Path("providers")
+    @APIResponse(
+            responseCode = "200",
+            description = "purge providers",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    @Operation(
+            summary = "Gets a set of provider names")
+    public Map<String, String> purgeProviders() {
+        return caches.stream().map(cache -> {
+            cache.purge();
+            return cache.getProviderName();
+        }).collect(Collectors.toMap(
+                Function.identity(),
+                str -> "Purged"
+        ));
     }
 
     /**

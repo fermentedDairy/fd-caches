@@ -7,6 +7,7 @@ import com.consol.citrus.dsl.endpoint.CitrusEndpoints;
 import com.consol.citrus.http.client.HttpClient;
 import com.consol.citrus.junit.jupiter.CitrusSupport;
 import com.consol.citrus.testng.TestNGCitrusSupport;
+import org.fermented.dairy.caches.rest.entity.records.ConfigOverriddenCacheRecord;
 import org.fermented.dairy.caches.rest.entity.records.DefaultCacheRecord;
 import org.fermented.dairy.caches.rest.entity.records.NamedCacheRecord;
 import org.fermented.dairy.caches.rest.entity.rto.Link;
@@ -27,6 +28,7 @@ import static org.fermented.dairy.caches.it.utils.RestUtils.validateDelete;
 import static org.fermented.dairy.caches.it.utils.RestUtils.validateGet;
 import static org.fermented.dairy.caches.it.utils.RestUtils.validateGetList;
 import static org.fermented.dairy.caches.it.utils.RestUtils.validatePut;
+import static org.junit.Assert.fail;
 
 @MicroShedTest
 @CitrusSupport
@@ -264,6 +266,109 @@ public class CachesIT extends TestNGCitrusSupport {
         validateGetList(client, context,
                 "api/caches/providers/namedCache/caches/%s/keys"
                         .formatted("namedCacheRecords"),
+                List.of()
+        );
+
+    }
+
+    @Test
+    @CitrusTest
+    @DisplayName("PUT record and fetch from configured cache, validate fetched object and verify presence in cache")
+    void putRecordAndFetchFromOverriddenCache(@CitrusResource final TestContext context) {
+        final UUID id = UUID.randomUUID();
+        validatePut(client, context, "api/data/overridden",
+                ConfigOverriddenCacheRecord.builder().id(id).value("PutTest").build(),
+                PutRecordResponse.builder().id(id).links(
+                        Set.of(
+                                Link.builder()
+                                        .rel("overridden")
+                                        .href("fd-caches-ol-cdi/api/data/overridden/%s".formatted(id.toString()))
+                                        .type("GET")
+                                        .build()
+                        )
+                ).build()
+        );
+
+        validateGet(client, context, "api/data/overridden/%s".formatted(id.toString()),
+                ConfigOverriddenCacheRecord.builder().id(id).value("PutTest").build()
+        );
+
+        validateGetList(client, context, "api/caches/providers/configuredCache",
+                List.of("configuredCacheRec")
+        );
+
+        validateGetList(client, context,
+                "api/caches/providers/configuredCache/caches/%s/keys"
+                        .formatted("configuredCacheRec"),
+                List.of(id)
+        );
+
+        validateGet(client, context,
+                "api/caches/providers/configuredCache/caches/%s/keys/%s"
+                        .formatted(
+                                "configuredCacheRec",
+                                id),
+                ConfigOverriddenCacheRecord.builder().id(id).value("PutTest").build()
+        );
+
+    }
+
+    @Test
+    @CitrusTest
+    @DisplayName("PUT record and fetch from named cache, validate fetched object and verify presence in cache then delete and verify")
+    void putRecordFetchDeleteFromConfiguredCache(@CitrusResource final TestContext context) {
+        final UUID id = UUID.randomUUID();
+        validatePut(client, context, "api/data/overridden",
+                ConfigOverriddenCacheRecord.builder().id(id).value("PutTest").build(),
+                PutRecordResponse.builder().id(id).links(
+                        Set.of(
+                                Link.builder()
+                                        .rel("overridden")
+                                        .href("fd-caches-ol-cdi/api/data/overridden/%s".formatted(id.toString()))
+                                        .type("GET")
+                                        .build()
+                        )
+                ).build()
+        );
+
+        validateGet(client, context, "api/data/overridden/%s".formatted(id.toString()),
+                ConfigOverriddenCacheRecord.builder().id(id).value("PutTest").build()
+        );
+
+        validateGetList(client, context, "api/caches/providers/configuredCache",
+                List.of("configuredCacheRec")
+        );
+
+        validateGetList(client, context,
+                "api/caches/providers/configuredCache/caches/%s/keys"
+                        .formatted("configuredCacheRec"),
+                List.of(id)
+        );
+
+        validateGet(client, context,
+                "api/caches/providers/configuredCache/caches/%s/keys/%s"
+                        .formatted(
+                                "configuredCacheRec",
+                                id),
+                ConfigOverriddenCacheRecord.builder().id(id).value("PutTest").build()
+        );
+
+        validatePut(client, context, "api/data/overridden",
+                ConfigOverriddenCacheRecord.builder().id(id).value("PutTest2").build(),
+                PutRecordResponse.builder().id(id).links(
+                        Set.of(
+                                Link.builder()
+                                        .rel("overridden")
+                                        .href("fd-caches-ol-cdi/api/data/overridden/%s".formatted(id.toString()))
+                                        .type("GET")
+                                        .build()
+                        )
+                ).build()
+        );
+
+        validateGetList(client, context,
+                "api/caches/providers/configuredCache/caches/%s/keys"
+                        .formatted("configuredCacheRec"),
                 List.of()
         );
 

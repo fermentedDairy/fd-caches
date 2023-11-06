@@ -1,6 +1,12 @@
 package org.fermented.dairy.caches.rest.entity.records;
 
+import lombok.Builder;
+import org.fermented.dairy.caches.interceptors.annotations.CacheKey;
+import org.fermented.dairy.caches.interceptors.annotations.Cached;
+
 import java.util.UUID;
 
-public record DisabledCacheRecord(UUID id, String value) {
+@Builder
+@Cached
+public record DisabledCacheRecord(@CacheKey UUID id, String value) {
 }

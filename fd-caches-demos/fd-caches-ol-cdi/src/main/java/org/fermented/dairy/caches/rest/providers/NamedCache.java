@@ -78,6 +78,7 @@ public class NamedCache implements Cache {
     @Override
     public void purge() {
         CACHE_MAP.clear();
+        CACHE_NAMES.clear();
     }
 
     @Override

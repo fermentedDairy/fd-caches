@@ -9,6 +9,7 @@ import com.consol.citrus.junit.jupiter.CitrusSupport;
 import com.consol.citrus.testng.TestNGCitrusSupport;
 import org.fermented.dairy.caches.rest.entity.records.ConfigOverriddenCacheRecord;
 import org.fermented.dairy.caches.rest.entity.records.DefaultCacheRecord;
+import org.fermented.dairy.caches.rest.entity.records.DisabledCacheRecord;
 import org.fermented.dairy.caches.rest.entity.records.NamedCacheRecord;
 import org.fermented.dairy.caches.rest.entity.rto.Link;
 import org.fermented.dairy.caches.rest.entity.rto.data.PutRecordResponse;
@@ -369,6 +370,42 @@ public class CachesIT extends TestNGCitrusSupport {
         validateGetList(client, context,
                 "api/caches/providers/configuredCache/caches/%s/keys"
                         .formatted("configuredCacheRec"),
+                List.of()
+        );
+
+    }
+
+    @Test
+    @CitrusTest
+    @DisplayName("PUT record and fetch record, cache disabled in config")
+    void putRecordAndFetchCacheDisabled(@CitrusResource final TestContext context) {
+        final UUID id = UUID.randomUUID();
+        validatePut(client, context, "api/data/disabled",
+                DisabledCacheRecord.builder().id(id).value("PutTest").build(),
+                PutRecordResponse.builder().id(id).links(
+                        Set.of(
+                                Link.builder()
+                                        .rel("disabled")
+                                        .href("fd-caches-ol-cdi/api/data/disabled/%s".formatted(id.toString()))
+                                        .type("GET")
+                                        .build()
+                        )
+                ).build()
+        );
+
+        validateGet(client, context, "api/data/disabled/%s".formatted(id.toString()),
+                DisabledCacheRecord.builder().id(id).value("PutTest").build()
+        );
+
+        validateGetList(client, context, "api/caches/providers/configuredCache",
+                List.of()
+        );
+
+        validateGetList(client, context, "api/caches/providers/namedCache",
+                List.of()
+        );
+
+        validateGetList(client, context, "api/caches/providers/internal.default.cache",
                 List.of()
         );
 

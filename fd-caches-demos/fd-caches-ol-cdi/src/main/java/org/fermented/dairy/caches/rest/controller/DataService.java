@@ -24,6 +24,8 @@ public class DataService {
 
     private static final Map<UUID, ConfigOverriddenCacheRecord> CONFIG_RECORDS = new HashMap<>();
 
+    private static final Map<UUID, DisabledCacheRecord> DISABLED_RECORDS = new HashMap<>();
+
     @CacheDelete
     @CachedType(DefaultCacheRecord.class)
     public void addDefaultCacheRecord(final DefaultCacheRecord dataRecord) {
@@ -60,11 +62,15 @@ public class DataService {
         return Optional.ofNullable(CONFIG_RECORDS.get(id));
     }
 
-    public void putDisabledCacheRecord(final DisabledCacheRecord dataRecord) {
-
+    @CacheDelete
+    @CachedType(DisabledCacheRecord.class)
+    public void addDisabledCacheRecord(final DisabledCacheRecord dataRecord) {
+        DISABLED_RECORDS.put(dataRecord.id(), dataRecord);
     }
 
+    @CacheLoad
+    @CachedType(DisabledCacheRecord.class)
     public Optional<DisabledCacheRecord> getDisabledCacheRecord(final UUID id) {
-        return Optional.empty();
+        return Optional.ofNullable(DISABLED_RECORDS.get(id));
     }
 }

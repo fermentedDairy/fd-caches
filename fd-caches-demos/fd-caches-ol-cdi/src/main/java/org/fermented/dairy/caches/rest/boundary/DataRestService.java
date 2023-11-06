@@ -17,6 +17,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import java.util.Map;
 import java.util.UUID;
+
 import lombok.extern.java.Log;
 import org.apache.commons.text.StringSubstitutor;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -42,6 +43,8 @@ public class DataRestService {
     private static final String NAMED_ID_PATH = "named/{id}";
 
     private static final String OVERRIDDEN_ID_PATH = "overridden/{id}";
+
+    private static final String DISABLED_ID_PATH = "disabled/{id}";
 
     @Inject
     private DataService dataService;
@@ -186,12 +189,25 @@ public class DataRestService {
     @Operation(
             summary = "Gets a set of keys for a given cache and provider")
     @APIResponseSchema(PutRecordResponse.class)
-    public PutRecordResponse addDisabled(@NotNull final ConfigOverriddenCacheRecord cacheRecord) {
-        return null;
+    public PutRecordResponse addDisabled(@NotNull final DisabledCacheRecord cacheRecord) {
+        dataService.addDisabledCacheRecord(cacheRecord);
+        return PutRecordResponse.builder()
+                .id(cacheRecord.id())
+                .link(
+                        Link.builder()
+                                .rel("disabled")
+                                .href(StringSubstitutor.replace(
+                                        generateURLfromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, DISABLED_ID_PATH),
+                                        Map.of("id", cacheRecord.id()),
+                                        "{", "}"))
+                                .type("GET")
+                                .build()
+                )
+                .build();
     }
 
     @GET
-    @Path("/disabled/{id}")
+    @Path(DISABLED_ID_PATH)
     @APIResponse(
             responseCode = "200",
             description = "GET the DisabledCacheRecord requested",
@@ -202,8 +218,9 @@ public class DataRestService {
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     @Operation(
             summary = "Gets a set of keys for a given cache and provider")
-    @APIResponseSchema(ConfigOverriddenCacheRecord.class)
-    public DisabledCacheRecord getDisabled(@PathParam("id") final String id) {
-        throw new NotFoundException("DisabledCacheRecord with id: %s not found".formatted(id));
+    @APIResponseSchema(DisabledCacheRecord.class)
+    public DisabledCacheRecord getDisabled(@PathParam("id") final UUID id) {
+        return dataService.getDisabledCacheRecord(id)
+                .orElseThrow(() -> new NotFoundException("No DisabledCacheRecord with id %s found".formatted(id)));
     }
 }

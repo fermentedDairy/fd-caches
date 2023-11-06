@@ -10,7 +10,6 @@ import org.fermented.dairy.caches.providers.HashMapCache;
  * Utility holding producer methods for non CDI Cache beans.
  */
 @ApplicationScoped
-
 public class Injector {
 
     /**

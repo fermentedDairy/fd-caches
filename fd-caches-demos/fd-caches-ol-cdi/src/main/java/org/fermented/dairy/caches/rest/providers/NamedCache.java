@@ -1,10 +1,6 @@
 package org.fermented.dairy.caches.rest.providers;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import org.fermented.dairy.caches.api.functions.Loader;
-import org.fermented.dairy.caches.api.functions.OptionalLoader;
-import org.fermented.dairy.caches.api.interfaces.Cache;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
@@ -12,6 +8,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.fermented.dairy.caches.api.functions.Loader;
+import org.fermented.dairy.caches.api.functions.OptionalLoader;
+import org.fermented.dairy.caches.api.interfaces.Cache;
 
 @ApplicationScoped
 public class NamedCache implements Cache {

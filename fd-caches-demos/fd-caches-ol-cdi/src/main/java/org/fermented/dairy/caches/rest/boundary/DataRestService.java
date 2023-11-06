@@ -5,6 +5,7 @@ import static org.fermented.dairy.caches.rest.URLS.CONTEXT_ROOT;
 import static org.fermented.dairy.caches.rest.URLS.DATA_ROOT;
 import static org.fermented.dairy.caches.rest.URLS.generateURLfromParts;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
@@ -18,6 +19,8 @@ import jakarta.ws.rs.core.MediaType;
 import java.util.Map;
 import java.util.UUID;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.text.StringSubstitutor;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -32,6 +35,12 @@ import org.fermented.dairy.caches.rest.entity.records.NamedCacheRecord;
 import org.fermented.dairy.caches.rest.entity.rto.Link;
 import org.fermented.dairy.caches.rest.entity.rto.data.PutRecordResponse;
 
+/**
+ * REST Boundary for data operations.
+ */
+@ApplicationScoped
+@AllArgsConstructor(onConstructor = @__(@Inject))
+@NoArgsConstructor
 @Path(DATA_ROOT)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -46,7 +55,6 @@ public class DataRestService {
 
     private static final String DISABLED_ID_PATH = "disabled/{id}";
 
-    @Inject
     private DataService dataService;
 
     @PUT

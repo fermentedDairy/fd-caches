@@ -1,12 +1,10 @@
 package org.fermented.dairy.caches.rest.controller;
 
 import jakarta.enterprise.context.ApplicationScoped;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.fermented.dairy.caches.interceptors.annotations.CacheDelete;
 import org.fermented.dairy.caches.interceptors.annotations.CacheLoad;
 import org.fermented.dairy.caches.interceptors.annotations.CachedType;

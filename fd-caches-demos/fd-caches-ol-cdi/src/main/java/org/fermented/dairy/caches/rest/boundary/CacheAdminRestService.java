@@ -18,6 +18,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
@@ -27,12 +30,13 @@ import org.fermented.dairy.caches.api.interfaces.Cache;
  * REST boundary for cache admin.
  */
 @ApplicationScoped
+@AllArgsConstructor(onConstructor = @__(@Inject))
+@NoArgsConstructor
 @Path("/caches")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class CacheAdminRestService {
 
-    @Inject
     private Instance<Cache> caches;
 
     /**

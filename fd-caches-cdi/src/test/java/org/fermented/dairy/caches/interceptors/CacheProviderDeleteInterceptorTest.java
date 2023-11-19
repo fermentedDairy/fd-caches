@@ -2,7 +2,7 @@ package org.fermented.dairy.caches.interceptors;
 
 import jakarta.enterprise.inject.Instance;
 import org.eclipse.microprofile.config.Config;
-import org.fermented.dairy.caches.api.interfaces.Cache;
+import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 import org.fermented.dairy.caches.interceptors.beans.CacheBean;
 import org.fermented.dairy.caches.interceptors.entities.CacheRecord;
 import org.fermented.dairy.caches.interceptors.entities.DefaultCacheEntityClass;
@@ -25,26 +25,26 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CacheDeleteInterceptorTest {
+class CacheProviderDeleteInterceptorTest {
 
     CacheDeleteInterceptor cacheDeleteInterceptor;
 
     @Mock
-    Instance<Cache> providers;
+    Instance<CacheProvider> providers;
 
     @Mock
-    Cache defaultCache;
+    CacheProvider defaultCacheProvider;
 
     @Mock
-    Cache cache1;
+    CacheProvider cacheProvider1;
 
     @Mock
-    Cache cache2;
+    CacheProvider cacheProvider2;
 
     @Mock
     Config config;
 
-    List<Cache> cacheInstances;
+    List<CacheProvider> cacheProviderInstances;
 
     @BeforeEach
     void init() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
@@ -52,23 +52,23 @@ class CacheDeleteInterceptorTest {
     }
 
     void initInjectedCacheInstances() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        cacheInstances = List.of(
-                cache1, cache2, defaultCache
+        cacheProviderInstances = List.of(
+                cacheProvider1, cacheProvider2, defaultCacheProvider
         );
-        lenient().when(defaultCache.getProviderName()).thenReturn("default");
-        lenient().when(cache1.getProviderName()).thenReturn("cache1");
-        lenient().when(cache2.getProviderName()).thenReturn("cache2");
-        lenient().when(providers.iterator()).thenReturn(cacheInstances.iterator());
-        lenient().when(providers.stream()).thenReturn(cacheInstances.stream());
-        lenient().when(config.getOptionalValue("fd.caches.ttl.default", String.class))
+        lenient().when(defaultCacheProvider.getProviderName()).thenReturn("default");
+        lenient().when(cacheProvider1.getProviderName()).thenReturn("cache1");
+        lenient().when(cacheProvider2.getProviderName()).thenReturn("cache2");
+        lenient().when(providers.iterator()).thenReturn(cacheProviderInstances.iterator());
+        lenient().when(providers.stream()).thenReturn(cacheProviderInstances.stream());
+        lenient().when(config.getOptionalValue("fd.config.cache.provider.default", String.class))
                 .thenReturn(Optional.of("default"));
-        lenient().when(config.getOptionalValue("fd.caches.provider.default", Long.class))
+        lenient().when(config.getOptionalValue("fd.config.cache.ttl.default", Long.class))
                 .thenReturn(Optional.of(3000L));
         cacheDeleteInterceptor = new CacheDeleteInterceptor(config, providers);
     }
 
     @DisplayName("""
-            The intercepted method has a single parameter, delete in default cache
+            The intercepted method has a single parameter, delete in default cacheProvider
              Method: DefaultCacheEntityClass deleteDefault(Long key)\s
             """)
     @Test
@@ -78,11 +78,11 @@ class CacheDeleteInterceptorTest {
         final DefaultCacheEntityClass expectedObject = new DefaultCacheEntityClass(1L);
         final Object actual = cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, expectedObject, 1L));
         assertSame(actual, expectedObject, "Incorrect object returned");
-        verify(defaultCache).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
+        verify(defaultCacheProvider).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
     }
 
     @DisplayName("""
-            The intercepted method has 2 parameters, one annotated as the key, delete in default cache
+            The intercepted method has 2 parameters, one annotated as the key, delete in default cacheProvider
              Method: DefaultCacheEntityClass deleteDefault(Object dummy, @CacheKey Long key)\s
             """)
     @Test
@@ -94,7 +94,7 @@ class CacheDeleteInterceptorTest {
         final Object actual = cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, expectedObject, new Object(), 1L));
 
         assertSame(actual, expectedObject, "Incorrect object returned");
-        verify(defaultCache).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
+        verify(defaultCacheProvider).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
     }
 
     @DisplayName("""
@@ -106,13 +106,13 @@ class CacheDeleteInterceptorTest {
         final Method interceptedMethod = CacheBean.class.getMethod("deleteDefault", Long.class, Long.class);
         final CacheInterceptorException actualException = assertThrows(CacheInterceptorException.class,
                 () -> cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L), 2L, 1L)));
-        verify(defaultCache, never()).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
+        verify(defaultCacheProvider, never()).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
         assertEquals("No parameter is on annotated with the 'CacheKey' annotation or is a cached bean for method deleteDefault in class, could not determine cache key.",
                 actualException.getMessage());
     }
 
     @DisplayName("""
-            The intercepted method has a single parameter, delete in named cache
+            The intercepted method has a single parameter, delete in named cacheProvider
              Method: void deleteDefault(Long key)\s
             """)
     @Test
@@ -122,11 +122,11 @@ class CacheDeleteInterceptorTest {
         final NamedCachedBean expectedObject = new NamedCachedBean(1L);
         final Object actual = cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, expectedObject, 1L));
         assertSame(actual, expectedObject, "Incorrect object returned");
-        verify(cache1).removeValue("overriddenCacheName", 1L);
+        verify(cacheProvider1).removeValue("overriddenCacheName", 1L);
     }
 
     @DisplayName("""
-            The intercepted method has 2 parameters, one annotated as the key, delete in named cache
+            The intercepted method has 2 parameters, one annotated as the key, delete in named cacheProvider
              Method: void deleteDefault(Object dummy, @CacheKey Long key)\s
             """)
     @Test
@@ -137,7 +137,7 @@ class CacheDeleteInterceptorTest {
         final Object actual = cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, expectedObject, new Object(), 1L));
 
         assertSame(actual, expectedObject, "Incorrect object returned");
-        verify(cache1).removeValue("overriddenCacheName", 1L);
+        verify(cacheProvider1).removeValue("overriddenCacheName", 1L);
     }
 
     @DisplayName("""
@@ -149,13 +149,13 @@ class CacheDeleteInterceptorTest {
         final Method interceptedMethod = CacheBean.class.getMethod("deleteNamed", Long.class, Long.class);
         final CacheInterceptorException actualException = assertThrows(CacheInterceptorException.class,
                 () -> cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L), new Object(), 1L)));
-        verify(defaultCache, never()).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
+        verify(defaultCacheProvider, never()).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
         assertEquals("No parameter is on annotated with the 'CacheKey' annotation or is a cached bean for method deleteNamed in class, could not determine cache key.",
                 actualException.getMessage());
     }
 
     @DisplayName("""
-            The intercepted method has a single parameter, delete in configured cache
+            The intercepted method has a single parameter, delete in configured cacheProvider
              Method: void deleteDefault(Long key)\s
             """)
     @Test
@@ -170,11 +170,11 @@ class CacheDeleteInterceptorTest {
         final NamedCachedBean expectedObject = new NamedCachedBean(1L);
         final Object actual = cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, expectedObject, 1L));
         assertSame(actual, expectedObject, "Incorrect object returned");
-        verify(cache2).removeValue("configuredCacheName", 1L);
+        verify(cacheProvider2).removeValue("configuredCacheName", 1L);
     }
 
     @DisplayName("""
-            The intercepted method has 2 parameters, one annotated as the key, delete in configured cache
+            The intercepted method has 2 parameters, one annotated as the key, delete in configured cacheProvider
              Method: void deleteDefault(Object dummy, @CacheKey Long key)\s
             """)
     @Test
@@ -188,11 +188,11 @@ class CacheDeleteInterceptorTest {
         final Object actual = cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, expectedObject, new Object(), 1L));
 
         assertSame(actual, expectedObject, "Incorrect object returned");
-        verify(cache2).removeValue("configuredCacheName", 1L);
+        verify(cacheProvider2).removeValue("configuredCacheName", 1L);
     }
 
     @DisplayName("""
-            The intercepted method has a single parameter that is a cached bean, delete in default cache
+            The intercepted method has a single parameter that is a cached bean, delete in default cacheProvider
              Method: DefaultCacheEntityClass deleteDefault(DefaultCacheEntityClass key)\s
             """)
     @Test
@@ -207,11 +207,11 @@ class CacheDeleteInterceptorTest {
                         expectedObject)
         );
         assertSame(actual, expectedObject, "Incorrect object returned");
-        verify(defaultCache).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
+        verify(defaultCacheProvider).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
     }
 
     @DisplayName("""
-            The intercepted method has 2 parameters, one annotated as cached bean delete from default cache
+            The intercepted method has 2 parameters, one annotated as cached bean delete from default cacheProvider
              Method: DefaultCacheEntityClass deleteDefault(Object dummy, DefaultCacheEntityClass key)\s
             """)
     @Test
@@ -227,11 +227,11 @@ class CacheDeleteInterceptorTest {
                         new Object(),
                         1L));
         assertSame(actual, expectedObject, "Incorrect object returned");
-        verify(defaultCache).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
+        verify(defaultCacheProvider).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
     }
 
     @DisplayName("""
-            The intercepted method has a single parameter that is a named cached bean, delete in named cache
+            The intercepted method has a single parameter that is a named cached bean, delete in named cacheProvider
              Method: DefaultCacheEntityClass deleteDefault(DefaultCacheEntityClass key)\s
             """)
     @Test
@@ -246,11 +246,11 @@ class CacheDeleteInterceptorTest {
                         expectedObject)
         );
         assertSame(actual, expectedObject, "Incorrect object returned");
-        verify(cache1).removeValue("overriddenCacheName", 1L);
+        verify(cacheProvider1).removeValue("overriddenCacheName", 1L);
     }
 
     @DisplayName("""
-            The intercepted method has 2 parameters, one is a named cached bean, delete in named cache
+            The intercepted method has 2 parameters, one is a named cached bean, delete in named cacheProvider
              Method: DefaultCacheEntityClass deleteDefault(Object dummy, DefaultCacheEntityClass key)\s
             """)
     @Test
@@ -268,11 +268,11 @@ class CacheDeleteInterceptorTest {
         );
 
         assertSame(actual, expectedObject, "Incorrect object returned");
-        verify(cache1).removeValue("overriddenCacheName", 1L);
+        verify(cacheProvider1).removeValue("overriddenCacheName", 1L);
     }
 
     @DisplayName("""
-            The intercepted method has a single parameter that is a named configured cached bean, delete in named configured cache
+            The intercepted method has a single parameter that is a named configured cached bean, delete in named configured cacheProvider
              Method: DefaultCacheEntityClass deleteDefault(DefaultCacheEntityClass key)\s
             """)
     @Test
@@ -290,11 +290,11 @@ class CacheDeleteInterceptorTest {
                         expectedObject)
         );
         assertSame(actual, expectedObject, "Incorrect object returned");
-        verify(cache2).removeValue("configuredCacheName", 1L);
+        verify(cacheProvider2).removeValue("configuredCacheName", 1L);
     }
 
     @DisplayName("""
-            The intercepted method has 2 parameters, one is a named cached bean with config, delete in named configured cache
+            The intercepted method has 2 parameters, one is a named cached bean with config, delete in named configured cacheProvider
              Method: DefaultCacheEntityClass deleteDefault(Object dummy, DefaultCacheEntityClass key)\s
             """)
     @Test
@@ -315,11 +315,11 @@ class CacheDeleteInterceptorTest {
         );
 
         assertSame(actual, expectedObject, "Incorrect object returned");
-        verify(cache2).removeValue("configuredCacheName", 1L);
+        verify(cacheProvider2).removeValue("configuredCacheName", 1L);
     }
 
     @DisplayName("""
-            The intercepted method has a single parameter that is a cached record, delete in default cache
+            The intercepted method has a single parameter that is a cached record, delete in default cacheProvider
              Method: DefaultCacheEntityClass deleteDefault(CacheRecord key)\s
             """)
     @Test
@@ -334,11 +334,11 @@ class CacheDeleteInterceptorTest {
                         expectedObject)
         );
         assertSame(actual, expectedObject, "Incorrect object returned");
-        verify(defaultCache).removeValue(CacheRecord.class.getCanonicalName(), 1L);
+        verify(defaultCacheProvider).removeValue(CacheRecord.class.getCanonicalName(), 1L);
     }
 
     @DisplayName("""
-            The intercepted method has multiple parameters, one is a cached record, delete in default cache
+            The intercepted method has multiple parameters, one is a cached record, delete in default cacheProvider
              Method: DefaultCacheEntityClass deleteDefault(Long dummy, DefaultCacheEntityClass key)\s
             """)
     @Test
@@ -353,6 +353,6 @@ class CacheDeleteInterceptorTest {
                         expectedObject)
         );
         assertSame(actual, expectedObject, "Incorrect object returned");
-        verify(defaultCache).removeValue(CacheRecord.class.getCanonicalName(), 1L);
+        verify(defaultCacheProvider).removeValue(CacheRecord.class.getCanonicalName(), 1L);
     }
 }

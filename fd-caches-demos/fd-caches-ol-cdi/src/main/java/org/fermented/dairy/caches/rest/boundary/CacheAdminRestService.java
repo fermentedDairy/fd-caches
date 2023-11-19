@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.fermented.dairy.caches.api.interfaces.Cache;
+import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 
 /**
  * REST boundary for cache admin.
@@ -37,7 +37,7 @@ import org.fermented.dairy.caches.api.interfaces.Cache;
 @Consumes(MediaType.APPLICATION_JSON)
 public class CacheAdminRestService {
 
-    private Instance<Cache> caches;
+    private Instance<CacheProvider> caches;
 
     /**
      * Get all cache provider names.
@@ -53,7 +53,7 @@ public class CacheAdminRestService {
     @Operation(
             summary = "Gets a set of provider names")
     public Set<String> getProviders() {
-        return caches.stream().map(Cache::getProviderName).collect(Collectors.toSet());
+        return caches.stream().map(CacheProvider::getProviderName).collect(Collectors.toSet());
     }
 
     /**
@@ -100,7 +100,7 @@ public class CacheAdminRestService {
     public Set<String> getCacheNames(@PathParam("provider") @NotNull final String provider) {
         return Set.copyOf(caches.stream()
                 .filter(cache -> provider.equalsIgnoreCase(cache.getProviderName()))
-                .findFirst().map(Cache::getCacheNames)
+                .findFirst().map(CacheProvider::getCacheNames)
                 .orElseThrow(() -> new NotFoundException("cache provider named %s not found".formatted(provider)
                 )));
     }
@@ -127,17 +127,17 @@ public class CacheAdminRestService {
             summary = "Gets a set of keys for a given cache and provider")
     public Set<Object> getKeys(@PathParam("provider") @NotNull final String provider,
                                @PathParam("cacheName") @NotNull final String cacheName) {
-        final Cache cache = caches.stream()
+        final CacheProvider cacheProvider = caches.stream()
                 .filter(cacheItem -> provider.equalsIgnoreCase(cacheItem.getProviderName()))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("cache provider named %s not found".formatted(provider)
                 ));
 
-        if (!cache.getCacheNames().contains(cacheName)) {
+        if (!cacheProvider.getCacheNames().contains(cacheName)) {
             throw new NotFoundException(
                     "Cache provider named %s does not contain a cache named %s".formatted(provider, cacheName));
         }
-        return Set.copyOf(cache.getKeys(cacheName));
+        return Set.copyOf(cacheProvider.getKeys(cacheName));
     }
 
     /**
@@ -164,7 +164,7 @@ public class CacheAdminRestService {
                           @PathParam("cacheName") @NotNull final String cacheName,
                           @PathParam("key") @NotNull final UUID key) {
 
-        final Cache cacheProvider = caches.stream()
+        final CacheProvider cacheProvider = caches.stream()
                 .filter(cache -> provider.equalsIgnoreCase(cache.getProviderName()))
                 .findFirst()
                 .orElseThrow(

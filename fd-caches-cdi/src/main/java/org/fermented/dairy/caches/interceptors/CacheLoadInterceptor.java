@@ -13,7 +13,7 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 
 import org.eclipse.microprofile.config.Config;
-import org.fermented.dairy.caches.api.interfaces.Cache;
+import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 import org.fermented.dairy.caches.interceptors.annotations.CacheLoad;
 import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorException;
 
@@ -28,7 +28,7 @@ import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorExcept
 public class CacheLoadInterceptor extends AbstractCacheInterceptor {
 
     @Inject
-    public CacheLoadInterceptor(final Config config, final Instance<Cache> providers) {
+    public CacheLoadInterceptor(final Config config, final Instance<CacheProvider> providers) {
         super(config, providers);
     }
 

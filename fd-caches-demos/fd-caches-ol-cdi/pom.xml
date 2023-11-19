@@ -190,9 +190,9 @@
                 </executions>
                 <configuration>
                     <include>runnable</include>
-                    <serverName>fd-cache-ol-demo</serverName>
+                    <serverName>fd-cacheProvider-ol-demo</serverName>
                     <bootstrapProperties>
-                        <project.name>fd-cache-ol-demo</project.name>
+                        <project.name>fd-cacheProvider-ol-demo</project.name>
                         <app.context.root>/</app.context.root>
                     </bootstrapProperties>
                 </configuration>

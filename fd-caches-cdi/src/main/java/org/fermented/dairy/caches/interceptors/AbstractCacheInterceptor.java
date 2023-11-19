@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.eclipse.microprofile.config.Config;
-import org.fermented.dairy.caches.api.interfaces.Cache;
+import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 import org.fermented.dairy.caches.interceptors.annotations.CacheKey;
 import org.fermented.dairy.caches.interceptors.annotations.Cached;
 import org.fermented.dairy.caches.interceptors.annotations.CachedType;
@@ -35,19 +35,19 @@ public class AbstractCacheInterceptor {
 
     private final Config config;
 
-    private final Instance<Cache> providers;
+    private final Instance<CacheProvider> providers;
 
-    private Map<String, Cache> cacheNameMap;
+    private Map<String, CacheProvider> cacheNameMap;
 
     @Inject
     public AbstractCacheInterceptor(
             final Config config,
-            final Instance<Cache> providers) {
+            final Instance<CacheProvider> providers) {
         this.defaultProviderName = config
-                .getOptionalValue("fd.caches.ttl.default", String.class)
+                .getOptionalValue("fd.config.cache.provider.default", String.class)
                 .orElse("internal.default.cache");
         this.defaultTtl = config
-                .getOptionalValue("fd.caches.provider.default", Long.class)
+                .getOptionalValue("fd.config.cache.ttl.default", Long.class)
                 .orElse(ONE_HOUR_IN_MILLIS);
         this.config = config;
         this.providers = providers;
@@ -72,7 +72,7 @@ public class AbstractCacheInterceptor {
                 .findFirst().orElseThrow(() -> new CacheInterceptorException("Could not determine cached class for method %s", method.getName()));
     }
 
-    protected Cache getCacheForLoad(final Method method) {
+    protected CacheProvider getCacheForLoad(final Method method) {
         final Class<?> returnType = getActualReturnedClass(method);
         final Optional<String> cacheProviderConfig = config.getOptionalValue(
                 CONFIG_TEMPLATE.formatted(returnType.getCanonicalName(), "cacheprovider"), String.class);
@@ -90,7 +90,7 @@ public class AbstractCacheInterceptor {
         return cacheNameMap.getOrDefault(cacheName, cacheNameMap.get(defaultProviderName));
     }
 
-    protected Cache getCacheForDelete(final Method method) throws CacheInterceptorException {
+    protected CacheProvider getCacheForDelete(final Method method) throws CacheInterceptorException {
         final Class<?> cacheClass = getCachedClassForDelete(method);
 
         final Optional<String> cacheProviderConfig = config.getOptionalValue(
@@ -195,7 +195,7 @@ public class AbstractCacheInterceptor {
 
     private void initCacheNameMap() {
         cacheNameMap = providers.stream().collect(Collectors.toMap(
-                Cache::getProviderName,
+                CacheProvider::getProviderName,
                 Function.identity()
         ));
 

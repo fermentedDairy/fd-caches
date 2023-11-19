@@ -11,14 +11,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.fermented.dairy.caches.api.exceptions.CacheException;
 import org.fermented.dairy.caches.api.functions.Loader;
 import org.fermented.dairy.caches.api.functions.OptionalLoader;
-import org.fermented.dairy.caches.api.interfaces.Cache;
+import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 
 /**
  * A hashmap based cache provider.
  *
  * @noinspection rawtypes
  */
-public class HashMapCache implements Cache {
+public class HashMapCacheProvider implements CacheProvider {
 
     private static final ConcurrentHashMap<String, CacheHolder> CACHES = new ConcurrentHashMap<>(); //NOSONAR: java3740
 

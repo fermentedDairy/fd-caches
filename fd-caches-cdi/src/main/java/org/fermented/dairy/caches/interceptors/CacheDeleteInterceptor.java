@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.Config;
-import org.fermented.dairy.caches.api.interfaces.Cache;
+import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 import org.fermented.dairy.caches.interceptors.annotations.CacheDelete;
 import org.fermented.dairy.caches.interceptors.annotations.CacheKey;
 import org.fermented.dairy.caches.interceptors.annotations.CacheLoad;
@@ -35,7 +35,7 @@ import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorExcept
 public class CacheDeleteInterceptor extends AbstractCacheInterceptor {
 
     @Inject
-    public CacheDeleteInterceptor(final Config config, final Instance<Cache> providers) {
+    public CacheDeleteInterceptor(final Config config, final Instance<CacheProvider> providers) {
         super(config, providers);
     }
 
@@ -50,7 +50,7 @@ public class CacheDeleteInterceptor extends AbstractCacheInterceptor {
     @AroundInvoke
     public Object deleteFromCache(final InvocationContext ctx) throws Exception {
 
-        final Cache cacheProvider = getCacheForDelete(ctx.getMethod());
+        final CacheProvider cacheProvider = getCacheForDelete(ctx.getMethod());
         final String cacheName = getCacheNameForDelete(ctx.getMethod());
         Object key = getCacheKey(ctx.getMethod(), ctx.getParameters());
         if (key.getClass().isAnnotationPresent(Cached.class)) {

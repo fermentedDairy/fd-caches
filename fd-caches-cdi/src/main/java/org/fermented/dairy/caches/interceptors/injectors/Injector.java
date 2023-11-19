@@ -2,9 +2,7 @@ package org.fermented.dairy.caches.interceptors.injectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
-import jakarta.inject.Inject;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.fermented.dairy.caches.providers.HashMapCache;
+import org.fermented.dairy.caches.providers.HashMapCacheProvider;
 
 /**
  * Utility holding producer methods for non CDI Cache beans.
@@ -19,8 +17,8 @@ public class Injector {
      */
     @ApplicationScoped
     @Produces
-    public HashMapCache hashMapCache() {
-        return new HashMapCache();
+    public HashMapCacheProvider hashMapCache() {
+        return new HashMapCacheProvider();
     }
 
 

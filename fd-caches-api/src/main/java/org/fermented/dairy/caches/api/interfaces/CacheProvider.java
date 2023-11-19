@@ -10,7 +10,7 @@ import org.fermented.dairy.caches.api.functions.OptionalLoader;
  *
  * @noinspection rawtypes
  */
-public interface Cache {
+public interface CacheProvider {
 
     /**
      * Load the value using the Loader function and stores it in the cache.

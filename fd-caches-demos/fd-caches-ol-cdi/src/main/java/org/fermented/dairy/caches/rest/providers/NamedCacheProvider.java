@@ -10,10 +10,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.fermented.dairy.caches.api.functions.Loader;
 import org.fermented.dairy.caches.api.functions.OptionalLoader;
-import org.fermented.dairy.caches.api.interfaces.Cache;
+import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 
 @ApplicationScoped
-public class NamedCache implements Cache {
+public class NamedCacheProvider implements CacheProvider {
 
     private static final ConcurrentHashMap<KeyHolder, ValueHolder> CACHE_MAP = new ConcurrentHashMap<>();
 

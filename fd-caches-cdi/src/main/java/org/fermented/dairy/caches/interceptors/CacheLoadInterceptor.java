@@ -11,10 +11,9 @@ import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 import java.lang.reflect.Method;
 import java.util.Optional;
-
 import org.eclipse.microprofile.config.Config;
+import org.fermented.dairy.caches.annotations.CacheLoad;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
-import org.fermented.dairy.caches.interceptors.annotations.CacheLoad;
 import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorException;
 
 

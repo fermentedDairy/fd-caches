@@ -9,6 +9,7 @@ module fd.caches.ol.cdi {
     requires lombok;
     requires org.apache.commons.text;
     requires java.logging;
+    requires fd.caches.annotations;
 
     //for testing
     exports org.fermented.dairy.caches.rest.entity.rto;

@@ -22,6 +22,7 @@
         <module>fd-caches-cdi</module>
         <module>fd-caches-providers</module>
         <module>fd-caches-demos</module>
+        <module>fd-caches-annotations</module>
     </modules>
 
     <build>

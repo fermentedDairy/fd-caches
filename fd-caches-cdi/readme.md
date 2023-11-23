@@ -5,7 +5,7 @@ A CDI interceptor driven caching implementation.
 
 ## Preparing Classes For Caching
 
-Classes and records that will be cached, need to be cached with the []
+Classes and records that will be cached, need to be annotated with the [@Cached](../fd-caches-api/src/main/java/org/fermented/dairy/caches/api/) annotation.
 
 ## Inserting Objects Into Caches
 

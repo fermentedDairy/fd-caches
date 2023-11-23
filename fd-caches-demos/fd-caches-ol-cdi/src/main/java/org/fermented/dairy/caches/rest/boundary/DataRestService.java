@@ -3,7 +3,7 @@ package org.fermented.dairy.caches.rest.boundary;
 import static org.fermented.dairy.caches.rest.Urls.APP_ROOT;
 import static org.fermented.dairy.caches.rest.Urls.CONTEXT_ROOT;
 import static org.fermented.dairy.caches.rest.Urls.DATA_ROOT;
-import static org.fermented.dairy.caches.rest.Urls.generateUrlfromParts;
+import static org.fermented.dairy.caches.rest.Urls.generateUrlFromParts;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -74,7 +74,7 @@ public class DataRestService {
                         Link.builder()
                                 .rel("default")
                                 .href(StringSubstitutor.replace(
-                                        generateUrlfromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, DEFAULT_ID_PATH),
+                                        generateUrlFromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, DEFAULT_ID_PATH),
                                         Map.of("id", cacheRecord.id()),
                                         "{", "}"))
                                 .type("GET")
@@ -118,7 +118,7 @@ public class DataRestService {
                         Link.builder()
                                 .rel("named")
                                 .href(StringSubstitutor.replace(
-                                        generateUrlfromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, NAMED_ID_PATH),
+                                        generateUrlFromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, NAMED_ID_PATH),
                                         Map.of("id", cacheRecord.id()),
                                         "{", "}"))
                                 .type("GET")
@@ -163,7 +163,7 @@ public class DataRestService {
                         Link.builder()
                                 .rel("overridden")
                                 .href(StringSubstitutor.replace(
-                                        generateUrlfromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, OVERRIDDEN_ID_PATH),
+                                        generateUrlFromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, OVERRIDDEN_ID_PATH),
                                         Map.of("id", cacheRecord.id()),
                                         "{", "}"))
                                 .type("GET")
@@ -208,7 +208,7 @@ public class DataRestService {
                         Link.builder()
                                 .rel("disabled")
                                 .href(StringSubstitutor.replace(
-                                        generateUrlfromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, DISABLED_ID_PATH),
+                                        generateUrlFromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, DISABLED_ID_PATH),
                                         Map.of("id", cacheRecord.id()),
                                         "{", "}"))
                                 .type("GET")

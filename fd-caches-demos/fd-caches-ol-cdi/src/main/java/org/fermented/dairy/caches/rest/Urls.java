@@ -19,7 +19,7 @@ public final class Urls {
      * @param parts the fragments to assemble into a URL.
      * @return assembled URL
      */
-    public static String generateUrlfromParts(final String... parts) {
+    public static String generateUrlFromParts(final String... parts) {
         return String.join("/", parts);
     }
 

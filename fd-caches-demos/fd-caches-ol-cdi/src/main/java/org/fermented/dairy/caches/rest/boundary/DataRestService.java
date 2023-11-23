@@ -1,9 +1,9 @@
 package org.fermented.dairy.caches.rest.boundary;
 
-import static org.fermented.dairy.caches.rest.URLS.APP_ROOT;
-import static org.fermented.dairy.caches.rest.URLS.CONTEXT_ROOT;
-import static org.fermented.dairy.caches.rest.URLS.DATA_ROOT;
-import static org.fermented.dairy.caches.rest.URLS.generateURLfromParts;
+import static org.fermented.dairy.caches.rest.Urls.APP_ROOT;
+import static org.fermented.dairy.caches.rest.Urls.CONTEXT_ROOT;
+import static org.fermented.dairy.caches.rest.Urls.DATA_ROOT;
+import static org.fermented.dairy.caches.rest.Urls.generateUrlfromParts;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -18,7 +18,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import java.util.Map;
 import java.util.UUID;
-
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
@@ -57,6 +56,7 @@ public class DataRestService {
 
     private DataService dataService;
 
+    @SuppressWarnings("checkstyle:MissingJavadocMethod")//In openAPI
     @PUT
     @Path("/default")
     @APIResponse(
@@ -74,7 +74,7 @@ public class DataRestService {
                         Link.builder()
                                 .rel("default")
                                 .href(StringSubstitutor.replace(
-                                        generateURLfromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, DEFAULT_ID_PATH),
+                                        generateUrlfromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, DEFAULT_ID_PATH),
                                         Map.of("id", cacheRecord.id()),
                                         "{", "}"))
                                 .type("GET")
@@ -96,10 +96,11 @@ public class DataRestService {
     @Operation(
             summary = "Gets a set of keys for a given cache and provider")
     @APIResponseSchema(DefaultCacheRecord.class)
-    public DefaultCacheRecord getDefault(@PathParam("id") UUID id) {
+    public DefaultCacheRecord getDefault(@PathParam("id") final UUID id) {
         return dataService.getDefault(id).orElseThrow(() -> new NotFoundException("No DefaultCacheRecord with id %s found".formatted(id)));
     }
 
+    @SuppressWarnings("checkstyle:MissingJavadocMethod")//In openAPI
     @PUT
     @Path("/named")
     @APIResponse(
@@ -117,7 +118,7 @@ public class DataRestService {
                         Link.builder()
                                 .rel("named")
                                 .href(StringSubstitutor.replace(
-                                        generateURLfromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, NAMED_ID_PATH),
+                                        generateUrlfromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, NAMED_ID_PATH),
                                         Map.of("id", cacheRecord.id()),
                                         "{", "}"))
                                 .type("GET")
@@ -144,6 +145,7 @@ public class DataRestService {
                 .orElseThrow(() -> new NotFoundException("No NamedCacheRecord with id %s found".formatted(id)));
     }
 
+    @SuppressWarnings("checkstyle:MissingJavadocMethod")//In openAPI
     @PUT
     @Path("/overridden")
     @APIResponse(
@@ -161,7 +163,7 @@ public class DataRestService {
                         Link.builder()
                                 .rel("overridden")
                                 .href(StringSubstitutor.replace(
-                                        generateURLfromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, OVERRIDDEN_ID_PATH),
+                                        generateUrlfromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, OVERRIDDEN_ID_PATH),
                                         Map.of("id", cacheRecord.id()),
                                         "{", "}"))
                                 .type("GET")
@@ -188,6 +190,7 @@ public class DataRestService {
                 .orElseThrow(() -> new NotFoundException("No ConfigOverriddenCacheRecord with id %s found".formatted(id)));
     }
 
+    @SuppressWarnings("checkstyle:MissingJavadocMethod")//In openAPI
     @PUT
     @Path("/disabled")
     @APIResponse(
@@ -205,7 +208,7 @@ public class DataRestService {
                         Link.builder()
                                 .rel("disabled")
                                 .href(StringSubstitutor.replace(
-                                        generateURLfromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, DISABLED_ID_PATH),
+                                        generateUrlfromParts(CONTEXT_ROOT, APP_ROOT, DATA_ROOT, DISABLED_ID_PATH),
                                         Map.of("id", cacheRecord.id()),
                                         "{", "}"))
                                 .type("GET")

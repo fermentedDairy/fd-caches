@@ -12,6 +12,9 @@ import org.fermented.dairy.caches.api.functions.Loader;
 import org.fermented.dairy.caches.api.functions.OptionalLoader;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 
+/**
+ * Cache provider for testing cache configuration.
+ */
 @ApplicationScoped
 public class ConfiguredCacheProvider implements CacheProvider {
 
@@ -20,7 +23,13 @@ public class ConfiguredCacheProvider implements CacheProvider {
     private static final Set<String> CACHE_NAMES = new HashSet<>();
 
     @Override
-    public Object load(final Object key, final Loader<Object, Object> loader, final String cacheName, final long ttlMilliSeconds, final Class keyClass, final Class valueClass) throws Exception {
+    public Object load(
+            final Object key,
+            final Loader<Object, Object> loader,
+            final String cacheName,
+            final long ttlMilliSeconds,
+            final Class keyClass,
+            final Class valueClass) throws Exception {
         final ValueHolder holder = CACHE_MAP.computeIfAbsent(
                 new KeyHolder(cacheName, key),
                 kh -> {
@@ -42,7 +51,13 @@ public class ConfiguredCacheProvider implements CacheProvider {
     }
 
     @Override
-    public Object load(final Object key, final Object value, final String cacheName, final long ttlMilliSeconds, final Class keyClass, final Class valueClass) throws Exception {
+    public Object load(
+            final Object key,
+            final Object value,
+            final String cacheName,
+            final long ttlMilliSeconds,
+            final Class keyClass,
+            final Class valueClass) throws Exception {
         final ValueHolder holder = CACHE_MAP.computeIfAbsent(
                 new KeyHolder(cacheName, key),
                 kh -> new ValueHolder(
@@ -58,7 +73,13 @@ public class ConfiguredCacheProvider implements CacheProvider {
     }
 
     @Override
-    public Optional<Object> loadOptional(final Object key, final OptionalLoader<Object, Object> loader, final String cacheName, final long ttlMilliSeconds, final Class keyClass, final Class valueClass) throws Exception {
+    public Optional<Object> loadOptional(
+            final Object key,
+            final OptionalLoader<Object, Object> loader,
+            final String cacheName,
+            final long ttlMilliSeconds,
+            final Class keyClass,
+            final Class valueClass) throws Exception {
         return Optional.ofNullable(
                 load(
                         key,

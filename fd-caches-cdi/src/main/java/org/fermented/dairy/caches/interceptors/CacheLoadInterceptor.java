@@ -11,7 +11,6 @@ import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 import java.lang.reflect.Method;
 import java.util.Optional;
-
 import org.eclipse.microprofile.config.Config;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 import org.fermented.dairy.caches.interceptors.annotations.CacheLoad;
@@ -27,6 +26,12 @@ import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorExcept
 @Priority(LOAD_INTERCEPTOR_PRIORITY)
 public class CacheLoadInterceptor extends AbstractCacheInterceptor {
 
+    /**
+     * Constructor.
+     *
+     * @param config Config
+     * @param providers Injected CDI cache providers
+     */
     @Inject
     public CacheLoadInterceptor(final Config config, final Instance<CacheProvider> providers) {
         super(config, providers);

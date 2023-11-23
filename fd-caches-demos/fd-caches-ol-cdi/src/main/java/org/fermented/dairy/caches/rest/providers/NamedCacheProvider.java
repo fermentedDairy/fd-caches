@@ -20,7 +20,14 @@ public class NamedCacheProvider implements CacheProvider {
     private static final Set<String> CACHE_NAMES = new HashSet<>();
 
     @Override
-    public Object load(final Object key, final Loader<Object, Object> loader, final String cacheName, final long ttlMilliSeconds, final Class keyClass, final Class valueClass) throws Exception {
+    public Object load(
+            final Object key,
+            final Loader<Object, Object> loader,
+            final String cacheName,
+            final long ttlMilliSeconds,
+            final Class keyClass,
+            final Class valueClass) throws Exception {
+
         final ValueHolder holder = CACHE_MAP.computeIfAbsent(
                 new KeyHolder(cacheName, key),
                 kh -> {

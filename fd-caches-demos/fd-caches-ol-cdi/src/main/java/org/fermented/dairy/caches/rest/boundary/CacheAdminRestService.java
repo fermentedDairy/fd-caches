@@ -12,13 +12,11 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.eclipse.microprofile.openapi.annotations.Operation;

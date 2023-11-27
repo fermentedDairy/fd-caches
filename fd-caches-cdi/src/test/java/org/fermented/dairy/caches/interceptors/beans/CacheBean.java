@@ -104,13 +104,11 @@ public class CacheBean {
     }
 
     @CacheDelete
-    @CachedType(DefaultCacheEntityClass.class)
     public DefaultCacheEntityClass deleteDefault(DefaultCacheEntityClass toDelete) {
         return null;
     }
 
     @CacheDelete
-    @CachedType(DefaultCacheEntityClass.class)
     public DefaultCacheEntityClass deleteDefault(Long ignoredDummy, DefaultCacheEntityClass toDelete) {
         return null;
     }

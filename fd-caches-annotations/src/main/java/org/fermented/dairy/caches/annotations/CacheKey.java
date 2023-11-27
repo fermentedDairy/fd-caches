@@ -1,4 +1,4 @@
-package org.fermented.dairy.caches.interceptors.annotations;
+package org.fermented.dairy.caches.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

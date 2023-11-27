@@ -1,4 +1,4 @@
-package org.fermented.dairy.caches.interceptors.annotations;
+package org.fermented.dairy.caches.annotations;
 
 import jakarta.interceptor.InterceptorBinding;
 import java.lang.annotation.ElementType;

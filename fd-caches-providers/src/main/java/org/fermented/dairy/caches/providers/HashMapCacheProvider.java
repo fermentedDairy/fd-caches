@@ -199,8 +199,10 @@ public class HashMapCacheProvider implements CacheProvider {
 
         if ((cache = CACHES.get(cacheName)) == null
                 || (cacheReference = cache.cache().get(key)) == null
-                || (cacheEntry = cacheReference.get()) == null)
+                || (cacheEntry = cacheReference.get()) == null) {
             return Optional.empty();
+        }
+
         return Optional.of(cacheEntry.getValue());
     }
 

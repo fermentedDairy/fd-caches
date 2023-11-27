@@ -11,10 +11,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.eclipse.microprofile.config.Config;
+import org.fermented.dairy.caches.annotations.CacheKey;
+import org.fermented.dairy.caches.annotations.Cached;
+import org.fermented.dairy.caches.annotations.CachedType;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
-import org.fermented.dairy.caches.interceptors.annotations.CacheKey;
-import org.fermented.dairy.caches.interceptors.annotations.Cached;
-import org.fermented.dairy.caches.interceptors.annotations.CachedType;
 import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorException;
 import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorRuntimeException;
 
@@ -39,6 +39,12 @@ public class AbstractCacheInterceptor {
 
     private Map<String, CacheProvider> cacheNameMap;
 
+    /**
+     * Constructor with injection points.
+     *
+     * @param config the Config
+     * @param providers Cache Providers
+     */
     @Inject
     public AbstractCacheInterceptor(
             final Config config,
@@ -111,9 +117,10 @@ public class AbstractCacheInterceptor {
 
     protected Class<?> getActualReturnedClass(final Method method) {
         if (method.getReturnType().isAssignableFrom(Optional.class)) {
-            CachedType cachedTypeAnnotation;
+            final CachedType cachedTypeAnnotation;
             if ((cachedTypeAnnotation = method.getAnnotation(CachedType.class)) == null) {
-                throw new CacheInterceptorRuntimeException("%s returns an optional and must be annotated with 'CachedType'".formatted(method.getName()));
+                throw new CacheInterceptorRuntimeException(
+                        "%s returns an optional and must be annotated with 'CachedType'".formatted(method.getName()));
             }
             return cachedTypeAnnotation.value();
         } else {

@@ -1,7 +1,7 @@
 package org.fermented.dairy.caches.interceptors.entities;
 
-import org.fermented.dairy.caches.interceptors.annotations.CacheKey;
-import org.fermented.dairy.caches.interceptors.annotations.Cached;
+import org.fermented.dairy.caches.annotations.CacheKey;
+import org.fermented.dairy.caches.annotations.Cached;
 
 @SuppressWarnings("MissingJavadoc")
 @Cached

@@ -16,11 +16,11 @@ import java.util.Arrays;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.Config;
+import org.fermented.dairy.caches.annotations.CacheDelete;
+import org.fermented.dairy.caches.annotations.CacheKey;
+import org.fermented.dairy.caches.annotations.CacheLoad;
+import org.fermented.dairy.caches.annotations.Cached;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
-import org.fermented.dairy.caches.interceptors.annotations.CacheDelete;
-import org.fermented.dairy.caches.interceptors.annotations.CacheKey;
-import org.fermented.dairy.caches.interceptors.annotations.CacheLoad;
-import org.fermented.dairy.caches.interceptors.annotations.Cached;
 import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorException;
 
 

@@ -27,7 +27,6 @@ public class NamedCacheProvider implements CacheProvider {
             final long ttlMilliSeconds,
             final Class keyClass,
             final Class valueClass) throws Exception {
-
         final ValueHolder holder = CACHE_MAP.computeIfAbsent(
                 new KeyHolder(cacheName, key),
                 kh -> {
@@ -49,7 +48,13 @@ public class NamedCacheProvider implements CacheProvider {
     }
 
     @Override
-    public Object load(final Object key, final Object value, final String cacheName, final long ttlMilliSeconds, final Class keyClass, final Class valueClass) throws Exception {
+    public Object load(
+            final Object key,
+            final Object value,
+            final String cacheName,
+            final long ttlMilliSeconds,
+            final Class keyClass,
+            final Class valueClass) throws Exception {
         final ValueHolder holder = CACHE_MAP.computeIfAbsent(
                 new KeyHolder(cacheName, key),
                 kh -> new ValueHolder(
@@ -65,7 +70,13 @@ public class NamedCacheProvider implements CacheProvider {
     }
 
     @Override
-    public Optional<Object> loadOptional(final Object key, final OptionalLoader<Object, Object> loader, final String cacheName, final long ttlMilliSeconds, final Class keyClass, final Class valueClass) throws Exception {
+    public Optional<Object> loadOptional(
+            final Object key,
+            final OptionalLoader<Object, Object> loader,
+            final String cacheName,
+            final long ttlMilliSeconds,
+            final Class keyClass,
+            final Class valueClass) throws Exception {
         return Optional.ofNullable(
                 load(
                         key,

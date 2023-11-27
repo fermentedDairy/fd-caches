@@ -1,10 +1,10 @@
 package org.fermented.dairy.caches.interceptors.beans;
 
 import java.util.Optional;
-import org.fermented.dairy.caches.interceptors.annotations.CacheDelete;
-import org.fermented.dairy.caches.interceptors.annotations.CacheKey;
-import org.fermented.dairy.caches.interceptors.annotations.CacheLoad;
-import org.fermented.dairy.caches.interceptors.annotations.CachedType;
+import org.fermented.dairy.caches.annotations.CacheDelete;
+import org.fermented.dairy.caches.annotations.CacheKey;
+import org.fermented.dairy.caches.annotations.CacheLoad;
+import org.fermented.dairy.caches.annotations.CachedType;
 import org.fermented.dairy.caches.interceptors.entities.CacheRecord;
 import org.fermented.dairy.caches.interceptors.entities.DefaultCacheEntityClass;
 import org.fermented.dairy.caches.interceptors.entities.NamedCachedBean;
@@ -104,13 +104,11 @@ public class CacheBean {
     }
 
     @CacheDelete
-    @CachedType(DefaultCacheEntityClass.class)
     public DefaultCacheEntityClass deleteDefault(DefaultCacheEntityClass toDelete) {
         return null;
     }
 
     @CacheDelete
-    @CachedType(DefaultCacheEntityClass.class)
     public DefaultCacheEntityClass deleteDefault(Long ignoredDummy, DefaultCacheEntityClass toDelete) {
         return null;
     }

@@ -232,7 +232,7 @@ class CacheProviderDeleteInterceptorTest {
 
     @DisplayName("""
             The intercepted method has a single parameter that is a named cached bean, delete in named cacheProvider
-             Method: DefaultCacheEntityClass deleteDefault(DefaultCacheEntityClass key)\s
+             Method: DefaultCacheEntityClass deleteNamed(NamedCachedBean toDelete)\s
             """)
     @Test
     void defaultDeleteSingleParamNamedCachedObject() throws Exception {
@@ -251,7 +251,7 @@ class CacheProviderDeleteInterceptorTest {
 
     @DisplayName("""
             The intercepted method has 2 parameters, one is a named cached bean, delete in named cacheProvider
-             Method: DefaultCacheEntityClass deleteDefault(Object dummy, DefaultCacheEntityClass key)\s
+             Method: DefaultCacheEntityClass deleteNamed(Long ignoredDummy, NamedCachedBean toDelete)\s
             """)
     @Test
     void defaultDeleteMultipleParamOneIsNamedCachedBean() throws Exception {
@@ -320,7 +320,7 @@ class CacheProviderDeleteInterceptorTest {
 
     @DisplayName("""
             The intercepted method has a single parameter that is a cached record, delete in default cacheProvider
-             Method: DefaultCacheEntityClass deleteDefault(CacheRecord key)\s
+             Method: DefaultCacheEntityClass deleteRecord(CacheRecord toDelete)\s
             """)
     @Test
     void defaultDeleteSingleParamDefaultCachedRecord() throws Exception {
@@ -339,7 +339,7 @@ class CacheProviderDeleteInterceptorTest {
 
     @DisplayName("""
             The intercepted method has multiple parameters, one is a cached record, delete in default cacheProvider
-             Method: DefaultCacheEntityClass deleteDefault(Long dummy, DefaultCacheEntityClass key)\s
+             Method: DefaultCacheEntityClass deleteRecord(Long ignoredDummy, CacheRecord toDelete)\s
             """)
     @Test
     void defaultDeleteMultipleParamDefaultCachedRecord() throws Exception {

@@ -9,7 +9,7 @@ module fd.caches.cdi {
     requires microprofile.config.api;
     requires org.apache.commons.lang3;
     requires fd.caches.providers;
+    requires fd.caches.annotations;
 
     opens org.fermented.dairy.caches.interceptors to org.apache.commons.lang3;
-    exports org.fermented.dairy.caches.interceptors.annotations;
 }

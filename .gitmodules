@@ -1,0 +1,3 @@
+[submodule "fd-devOps"]
+	path = fd-devOps
+	url = https://github.com/fermentedDairy/fd-devOps.git

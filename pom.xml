@@ -107,4 +107,11 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>homelab-repository</id>
+            <url>https://reposilite.homelab.eds/local</url>
+        </repository>
+    </distributionManagement>
 </project>

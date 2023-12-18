@@ -23,6 +23,8 @@
         <module>fd-caches-providers</module>
         <module>fd-caches-demos</module>
         <module>fd-caches-annotations</module>
+        <module>fd-caches-aop</module>
+        <module>fd-caches-test</module>
     </modules>
 
     <build>

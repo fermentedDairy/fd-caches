@@ -76,7 +76,7 @@ class CacheProviderLoadInterceptorTest {
 
     @DisplayName("""
             The intercepted method has a single unannotated param. Default cacheProvider is used.
-             Method: DefaultCacheEntity load(Long param)
+             Method: DefaultCacheEntity defaultLoad(Long param)
             """)
     @Test
     void singleUnannotatedDefaultCacheCorrectKeyType() throws Exception {
@@ -207,7 +207,7 @@ class CacheProviderLoadInterceptorTest {
 
     @DisplayName("""
             The intercepted method has multiple params, one is annotated as a key. Param is the same type as annotated key member in DefaultCacheEntity, default cacheProvider is used.
-             Method: DefaultCacheEntity defaultLoad(Object dummy, @CacheKey Long param)
+             Method: DefaultCacheEntityClass defaultLoad(Object dummy, @CacheKey Long param)
             """)
     @Test
     void singleUnannotatedDefaultCacheCorrectAnnotatedKeyInParamsType() throws Exception {
@@ -250,7 +250,7 @@ class CacheProviderLoadInterceptorTest {
 
     @DisplayName("""
             The intercepted method has a single unannotated param and Optional return. Param is the same type as annotated key member in DefaultCacheEntity, default cacheProvider is used.
-             Method: Optional<DefaultCacheEntity> load(Long param)
+             Method: Optional<DefaultCacheEntity> defaultOptionalLoad(Long param)
             """)
     @Test
     void singleUnannotatedOptionalDefaultCacheCorrectKeyType() throws Exception {
@@ -279,7 +279,7 @@ class CacheProviderLoadInterceptorTest {
 
     @DisplayName("""
             The intercepted method has a single unannotated param and Optional return. Cache and cacheProvider name is used from annotation.
-             Method: Optional<DefaultCacheEntity> load(Long param)
+             Method: Optional<NamedCacheBean> namedOptionalLoad(Long param)
             """)
     @Test
     void singleUnannotatedOptionalNamedCacheCorrectKeyType() throws Exception {
@@ -307,7 +307,7 @@ class CacheProviderLoadInterceptorTest {
 
     @DisplayName("""
             The intercepted method has a single unannotated param and Optional return. Cache disabled in config.
-             Method: Optional<DefaultCacheEntity> load(Long param)
+             Method: Optional<NamedCachedBean> namedOptionalLoad(Long param)
             """)
     @Test
     void singleUnannotatedOptionalNamedCacheCorrectKeyTypeConfigDisabled() throws Exception {
@@ -346,7 +346,7 @@ class CacheProviderLoadInterceptorTest {
 
     @DisplayName("""
             The intercepted method has a single unannotated param and Optional return. Cache and cacheProvider name is used from config.
-             Method: Optional<DefaultCacheEntity> load(Long param)
+             Method: Optional<NamedCacheBean> namedOptionalLoad(Long param)
             """)
     @Test
     void singleUnannotatedOptionalNamedCacheCorrectKeyTypeConfigOverrides() throws Exception {
@@ -380,7 +380,7 @@ class CacheProviderLoadInterceptorTest {
 
     @DisplayName("""
             The intercepted method has a single unannotated param and Optional return. Param is the same type as annotated key member in DefaultCacheEntity, default cacheProvider is used.
-             Method: Optional<DefaultCacheEntity> defaultOptionalLoad(Object dummy, @CacheKey Long param)
+             Method: Optional<DefaultCacheEntityClass> defaultOptionalLoad(Object dummy, @CacheKey Long param)
             """)
     @Test
     void singleUnannotatedOptionalDefaultCacheCorrectKeyAnnotatedType() throws Exception {
@@ -408,7 +408,7 @@ class CacheProviderLoadInterceptorTest {
 
     @DisplayName("""
             The intercepted method, returning an Optional, has multiple params, none annotated as a key, exception is thrown.
-             Method: DefaultCacheEntity defaultLoad(Long dummy, Long param)
+             Method: Optional<DefaultCacheEntityClass> defaultOptionalLoad(Long dummy, Long param)
             """)
     @Test
     void singleUnannotatedDefaultCacheOptionalNoAnnotatedKeyInParamsType() throws Exception {
@@ -421,7 +421,7 @@ class CacheProviderLoadInterceptorTest {
 
     @DisplayName("""
             The intercepted method has no params, Exception is thrown.
-             Method: DefaultCacheEntity defaultLoad(Long dummy, Long param)
+             Method: DefaultCacheEntity defaultLoad()
             """)
     @Test
     void singleUnannotatedDefaultCacheNoParamsType() throws Exception {

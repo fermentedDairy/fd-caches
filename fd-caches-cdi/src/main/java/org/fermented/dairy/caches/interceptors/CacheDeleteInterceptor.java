@@ -1,6 +1,7 @@
 package org.fermented.dairy.caches.interceptors;
 
 import static org.fermented.dairy.caches.interceptors.PriorityValues.DELETE_INTERCEPTOR_PRIORITY;
+import static org.fermented.dairy.caches.interceptors.utils.Utils.initCacheNameMap;
 
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
@@ -9,19 +10,11 @@ import jakarta.inject.Inject;
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Optional;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.Config;
 import org.fermented.dairy.caches.annotations.CacheDelete;
-import org.fermented.dairy.caches.annotations.CacheKey;
 import org.fermented.dairy.caches.annotations.CacheLoad;
 import org.fermented.dairy.caches.annotations.Cached;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
-import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorException;
 
 
 /**
@@ -34,9 +27,15 @@ import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorExcept
 @Priority(DELETE_INTERCEPTOR_PRIORITY)
 public class CacheDeleteInterceptor extends AbstractCacheInterceptor {
 
+    /**
+     * Constructor.
+     *
+     * @param config Config
+     * @param providers Injected CDI cache providers
+     */
     @Inject
     public CacheDeleteInterceptor(final Config config, final Instance<CacheProvider> providers) {
-        super(config, providers);
+        super(MicroProfileCacheConfig.using(config), initCacheNameMap(providers));
     }
 
 
@@ -59,34 +58,6 @@ public class CacheDeleteInterceptor extends AbstractCacheInterceptor {
 
         cacheProvider.removeValue(cacheName, key);
         return ctx.proceed();
-    }
-
-    private Object getKeyFromCachedClass(final Object key) throws CacheInterceptorException {
-        final Class<?> keyClass = key.getClass();
-        final Field annotatedField = Arrays.stream(keyClass.getDeclaredFields())
-                .filter(field -> field.isAnnotationPresent(CacheKey.class))
-                .findFirst()
-                .orElseThrow(() -> new CacheInterceptorException("No field is annotated as the CacheKey"));
-
-        final String getterMethodName = keyClass.isRecord()
-                ? annotatedField.getName()
-                : "get%s".formatted(StringUtils.capitalize(annotatedField.getName()));
-
-        final Optional<Method> getterOptional = Arrays.stream(keyClass.getMethods())
-                .filter(method -> method.getName().equals(getterMethodName))
-                .filter(method -> method.getParameters().length == 0)
-                .findFirst();
-
-
-        try {
-            if (getterOptional.isPresent()) {
-                return getterOptional.get().invoke(key);
-            }
-            annotatedField.setAccessible(true); //NOSONAR: java:S3011 - I committed to this at least once with the annotation route
-            return annotatedField.get(key);
-        } catch (final IllegalAccessException | InvocationTargetException e) {
-            throw new CacheInterceptorException(e);
-        }
     }
 
 

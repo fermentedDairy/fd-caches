@@ -1,6 +1,7 @@
 package org.fermented.dairy.caches.interceptors;
 
 import static org.fermented.dairy.caches.interceptors.PriorityValues.LOAD_INTERCEPTOR_PRIORITY;
+import static org.fermented.dairy.caches.interceptors.utils.Utils.initCacheNameMap;
 
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
@@ -34,7 +35,7 @@ public class CacheLoadInterceptor extends AbstractCacheInterceptor {
      */
     @Inject
     public CacheLoadInterceptor(final Config config, final Instance<CacheProvider> providers) {
-        super(config, providers);
+        super(MicroProfileCacheConfig.using(config),  initCacheNameMap(providers));
     }
 
     /**

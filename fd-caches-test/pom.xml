@@ -9,15 +9,16 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>fd-caches-annotations</artifactId>
+    <artifactId>fd-caches-test</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>fd-caches-unit-test-utils</module>
+    </modules>
 
-    <dependencies>
-        <dependency>
-            <groupId>jakarta.interceptor</groupId>
-            <artifactId>jakarta.interceptor-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-    </dependencies>
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
 </project>

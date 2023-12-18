@@ -1,16 +1,13 @@
 package org.fermented.dairy.caches.interceptors;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import org.eclipse.microprofile.config.Config;
+import org.apache.commons.lang3.StringUtils;
 import org.fermented.dairy.caches.annotations.CacheKey;
 import org.fermented.dairy.caches.annotations.Cached;
 import org.fermented.dairy.caches.annotations.CachedType;
@@ -22,7 +19,6 @@ import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorRuntim
 /**
  * Abstract parent class for all interceptors.
  */
-@Dependent
 public class AbstractCacheInterceptor {
 
     private static final String CONFIG_TEMPLATE = "fd.config.cache.%s.%s";
@@ -33,22 +29,19 @@ public class AbstractCacheInterceptor {
 
     private final long defaultTtl;
 
-    private final Config config;
+    private final CacheConfig config;
 
-    private final Instance<CacheProvider> providers;
-
-    private Map<String, CacheProvider> cacheNameMap;
+    private final Map<String, CacheProvider> cacheNameMap;
 
     /**
      * Constructor with injection points.
      *
      * @param config the Config
-     * @param providers Cache Providers
+     * @param cacheNameMap map of cache names to cache implementations
      */
-    @Inject
     public AbstractCacheInterceptor(
-            final Config config,
-            final Instance<CacheProvider> providers) {
+            final CacheConfig config,
+            final Map<String, CacheProvider> cacheNameMap) {
         this.defaultProviderName = config
                 .getOptionalValue("fd.config.cache.provider.default", String.class)
                 .orElse("internal.default.cache");
@@ -56,8 +49,11 @@ public class AbstractCacheInterceptor {
                 .getOptionalValue("fd.config.cache.ttl.default", Long.class)
                 .orElse(ONE_HOUR_IN_MILLIS);
         this.config = config;
-        this.providers = providers;
-        initCacheNameMap();
+
+        this.cacheNameMap = cacheNameMap;
+        if (!cacheNameMap.containsKey(defaultProviderName)) {
+            throw new CacheInterceptorRuntimeException("Could not load default cache instance");
+        }
     }
 
     protected static Class<?> getCachedClassForDelete(final Method method) throws CacheInterceptorException {
@@ -200,17 +196,6 @@ public class AbstractCacheInterceptor {
         return getCacheNameFromConfig(method, cachedClass);
     }
 
-    private void initCacheNameMap() {
-        cacheNameMap = providers.stream().collect(Collectors.toMap(
-                CacheProvider::getProviderName,
-                Function.identity()
-        ));
-
-        if (!cacheNameMap.containsKey(defaultProviderName)) {
-            throw new CacheInterceptorRuntimeException("Could not load default cache instance");
-        }
-    }
-
     private static Optional<Cached> getCachedAnnotation(final Class<?> returnType, final Method method) {
         final Optional<Cached> optionalCachedAnnotation;
         if (returnType.isAssignableFrom(Optional.class)) {
@@ -227,5 +212,33 @@ public class AbstractCacheInterceptor {
             );
         }
         return optionalCachedAnnotation;
+    }
+
+    protected Object getKeyFromCachedClass(final Object key) throws CacheInterceptorException {
+        final Class<?> keyClass = key.getClass();
+        final Field annotatedField = Arrays.stream(keyClass.getDeclaredFields())
+                .filter(field -> field.isAnnotationPresent(CacheKey.class))
+                .findFirst()
+                .orElseThrow(() -> new CacheInterceptorException("No field is annotated as the CacheKey"));
+
+        final String getterMethodName = keyClass.isRecord()
+                ? annotatedField.getName()
+                : "get%s".formatted(StringUtils.capitalize(annotatedField.getName()));
+
+        final Optional<Method> getterOptional = Arrays.stream(keyClass.getMethods())
+                .filter(method -> method.getName().equals(getterMethodName))
+                .filter(method -> method.getParameters().length == 0)
+                .findFirst();
+
+
+        try {
+            if (getterOptional.isPresent()) {
+                return getterOptional.get().invoke(key);
+            }
+            annotatedField.setAccessible(true); //NOSONAR: java:S3011 - I committed to this at least once with the annotation route
+            return annotatedField.get(key);
+        } catch (final IllegalAccessException | InvocationTargetException e) {
+            throw new CacheInterceptorException(e);
+        }
     }
 }

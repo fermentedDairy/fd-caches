@@ -1,4 +1,4 @@
-package org.fermented.dairy.caches.interceptors;
+package org.fermented.dairy.caches.handlers;
 
 import java.util.Optional;
 

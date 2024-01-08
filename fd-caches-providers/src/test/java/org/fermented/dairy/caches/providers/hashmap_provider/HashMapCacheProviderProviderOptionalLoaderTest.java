@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import org.fermented.dairy.caches.api.exceptions.CacheException;
+import org.fermented.dairy.caches.api.exceptions.CacheRuntimeException;
 import org.fermented.dairy.caches.api.functions.Loader;
 import org.fermented.dairy.caches.api.functions.OptionalLoader;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
@@ -161,7 +161,7 @@ class HashMapCacheProviderProviderOptionalLoaderTest {
     void cacheMissFollowedInvalidKeyTypeException() {
         final OptionalLoader<Object, Object> firstLoader = key -> Optional.of(
                 "Number Loaded Into Cache: " + key);
-        final CacheException exception = assertThrows(CacheException.class, () -> provider.loadOptional("1", firstLoader, "NumberCache", 3000, Long.class, String.class));
+        final CacheRuntimeException exception = assertThrows(CacheRuntimeException.class, () -> provider.loadOptional("1", firstLoader, "NumberCache", 3000, Long.class, String.class));
         assertEquals("java.lang.String is not a valid key class for cache NumberCache", exception.getMessage());
     }
 
@@ -174,7 +174,7 @@ class HashMapCacheProviderProviderOptionalLoaderTest {
     @Test
     void cacheMissFollowedInvalidResultTypeException() {
         final OptionalLoader<Object, Object> loader = key -> Optional.of(Math.PI);
-        final CacheException exception = assertThrows(CacheException.class, () -> provider.loadOptional(1L, loader, "NumberCache", 3000, Long.class, String.class));
+        final CacheRuntimeException exception = assertThrows(CacheRuntimeException.class, () -> provider.loadOptional(1L, loader, "NumberCache", 3000, Long.class, String.class));
         assertEquals("java.lang.Double is not a valid result class for cache NumberCache", exception.getMessage());
     }
 

@@ -16,13 +16,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.microprofile.config.Config;
+import org.fermented.dairy.caches.api.exceptions.CacheException;
 import org.fermented.dairy.caches.api.functions.Loader;
 import org.fermented.dairy.caches.api.functions.OptionalLoader;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 import org.fermented.dairy.caches.interceptors.beans.CacheBean;
 import org.fermented.dairy.caches.interceptors.entities.DefaultCacheEntityClass;
 import org.fermented.dairy.caches.interceptors.entities.NamedCachedBean;
-import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorException;
 import org.fermented.dairy.caches.interceptors.utils.ContextUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -65,8 +65,7 @@ class CacheProviderLoadInterceptorTest {
         lenient().when(defaultCacheProvider.getProviderName()).thenReturn("default");
         lenient().when(cacheProvider1.getProviderName()).thenReturn("cache1");
         lenient().when(cacheProvider2.getProviderName()).thenReturn("cache2");
-        lenient().when(providers.iterator()).thenReturn(cacheProviderInstances.iterator());
-        lenient().when(providers.stream()).thenReturn(cacheProviderInstances.stream());
+        lenient().when(providers.spliterator()).thenReturn(cacheProviderInstances.spliterator());
         lenient().when(config.getOptionalValue("fd.config.cache.provider.default", String.class))
                 .thenReturn(Optional.of("default"));
         lenient().when(config.getOptionalValue("fd.config.cache.ttl.default", Long.class))
@@ -243,7 +242,7 @@ class CacheProviderLoadInterceptorTest {
         final Method interceptedMethod = CacheBean.class.getMethod("defaultLoad", Long.class, Long.class);
         final Long key = 1L;
 
-        final CacheInterceptorException actualException = assertThrows(CacheInterceptorException.class, () -> cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(key), 1234L, key)));
+        final CacheException actualException = assertThrows(CacheException.class, () -> cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(key), 1234L, key)));
         assertEquals("No parameter is on annotated with the 'CacheKey' annotation or is a cached bean for method defaultLoad in class, could not determine cache key.",
                 actualException.getMessage());
     }
@@ -414,7 +413,7 @@ class CacheProviderLoadInterceptorTest {
     void singleUnannotatedDefaultCacheOptionalNoAnnotatedKeyInParamsType() throws Exception {
         final Method interceptedMethod = CacheBean.class.getMethod("defaultOptionalLoad", Long.class, Long.class);
 
-        final CacheInterceptorException actualException = assertThrows(CacheInterceptorException.class, () -> cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L), 1234L, 1L)));
+        final CacheException actualException = assertThrows(CacheException.class, () -> cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L), 1234L, 1L)));
         assertEquals("No parameter is on annotated with the 'CacheKey' annotation or is a cached bean for method defaultOptionalLoad in class, could not determine cache key.",
                 actualException.getMessage());
     }
@@ -427,7 +426,7 @@ class CacheProviderLoadInterceptorTest {
     void singleUnannotatedDefaultCacheNoParamsType() throws Exception {
         final Method interceptedMethod = CacheBean.class.getMethod("defaultLoad");
 
-        final CacheInterceptorException actualException = assertThrows(CacheInterceptorException.class, () -> cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L))));
+        final CacheException actualException = assertThrows(CacheException.class, () -> cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L))));
         assertEquals("No parameters on method defaultLoad in class org.fermented.dairy.caches.interceptors.beans.CacheBean, could not determine cache key.",
                 actualException.getMessage());
     }
@@ -440,7 +439,7 @@ class CacheProviderLoadInterceptorTest {
     void singleUnannotatedDefaultCacheVoidReturnType() throws Exception {
         final Method interceptedMethod = CacheBean.class.getMethod("loadVoid", Long.class);
 
-        final CacheInterceptorException actualException = assertThrows(CacheInterceptorException.class, () -> cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L))));
+        final CacheException actualException = assertThrows(CacheException.class, () -> cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L))));
         assertEquals("void types cannot be cached",
                 actualException.getMessage());
     }

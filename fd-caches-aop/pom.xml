@@ -17,6 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <aspectj.version>1.9.20.1</aspectj.version>
         <spring-context.version>5.2.8.RELEASE</spring-context.version>
+        <spring.version>6.0.13</spring.version>
     </properties>
 
     <dependencies>
@@ -30,6 +31,21 @@
             <groupId>org.fermented.dairy.caches</groupId>
             <artifactId>fd-caches-annotations</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.fermented.dairy.caches</groupId>
+            <artifactId>fd-caches-shared</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.version}</version>
         </dependency>
 
         <!-- Test dependencies -->

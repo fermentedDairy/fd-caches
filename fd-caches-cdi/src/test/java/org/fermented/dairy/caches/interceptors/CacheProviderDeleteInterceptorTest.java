@@ -3,11 +3,11 @@ package org.fermented.dairy.caches.interceptors;
 import jakarta.enterprise.inject.Instance;
 import org.eclipse.microprofile.config.Config;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
+import org.fermented.dairy.caches.api.exceptions.CacheException;
 import org.fermented.dairy.caches.interceptors.beans.CacheBean;
 import org.fermented.dairy.caches.interceptors.entities.CacheRecord;
 import org.fermented.dairy.caches.interceptors.entities.DefaultCacheEntityClass;
 import org.fermented.dairy.caches.interceptors.entities.NamedCachedBean;
-import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorException;
 import org.fermented.dairy.caches.interceptors.utils.ContextUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -58,8 +58,7 @@ class CacheProviderDeleteInterceptorTest {
         lenient().when(defaultCacheProvider.getProviderName()).thenReturn("default");
         lenient().when(cacheProvider1.getProviderName()).thenReturn("cache1");
         lenient().when(cacheProvider2.getProviderName()).thenReturn("cache2");
-        lenient().when(providers.iterator()).thenReturn(cacheProviderInstances.iterator());
-        lenient().when(providers.stream()).thenReturn(cacheProviderInstances.stream());
+        lenient().when(providers.spliterator()).thenReturn(cacheProviderInstances.spliterator());
         lenient().when(config.getOptionalValue("fd.config.cache.provider.default", String.class))
                 .thenReturn(Optional.of("default"));
         lenient().when(config.getOptionalValue("fd.config.cache.ttl.default", Long.class))
@@ -104,7 +103,7 @@ class CacheProviderDeleteInterceptorTest {
     @Test
     void defaultDeleteMultipleParamWithoutAnnotation() throws Exception {
         final Method interceptedMethod = CacheBean.class.getMethod("deleteDefault", Long.class, Long.class);
-        final CacheInterceptorException actualException = assertThrows(CacheInterceptorException.class,
+        final CacheException actualException = assertThrows(CacheException.class,
                 () -> cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L), 2L, 1L)));
         verify(defaultCacheProvider, never()).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
         assertEquals("No parameter is on annotated with the 'CacheKey' annotation or is a cached bean for method deleteDefault in class, could not determine cache key.",
@@ -147,7 +146,7 @@ class CacheProviderDeleteInterceptorTest {
     @Test
     void namedDeleteMultipleParamWithoutAnnotation() throws Exception {
         final Method interceptedMethod = CacheBean.class.getMethod("deleteNamed", Long.class, Long.class);
-        final CacheInterceptorException actualException = assertThrows(CacheInterceptorException.class,
+        final CacheException actualException = assertThrows(CacheException.class,
                 () -> cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L), new Object(), 1L)));
         verify(defaultCacheProvider, never()).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
         assertEquals("No parameter is on annotated with the 'CacheKey' annotation or is a cached bean for method deleteNamed in class, could not determine cache key.",

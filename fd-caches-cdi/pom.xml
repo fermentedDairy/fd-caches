@@ -24,6 +24,11 @@
         </dependency>
         <dependency>
             <groupId>org.fermented.dairy.caches</groupId>
+            <artifactId>fd-caches-shared</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.fermented.dairy.caches</groupId>
             <artifactId>fd-caches-providers</artifactId>
             <version>${parent.version}</version>
         </dependency>

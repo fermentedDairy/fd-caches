@@ -10,6 +10,7 @@ module fd.caches.cdi {
     requires org.apache.commons.lang3;
     requires fd.caches.providers;
     requires fd.caches.annotations;
+    requires fd.caches.shared;
 
     opens org.fermented.dairy.caches.interceptors to org.apache.commons.lang3;
 }

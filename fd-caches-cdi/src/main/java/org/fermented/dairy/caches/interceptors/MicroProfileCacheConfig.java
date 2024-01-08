@@ -2,6 +2,7 @@ package org.fermented.dairy.caches.interceptors;
 
 import java.util.Optional;
 import org.eclipse.microprofile.config.Config;
+import org.fermented.dairy.caches.handlers.CacheConfig;
 
 /**
  * Microprofile Cache wrapper implementation of {@link CacheConfig}.

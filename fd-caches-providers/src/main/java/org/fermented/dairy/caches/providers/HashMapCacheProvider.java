@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.fermented.dairy.caches.api.exceptions.CacheException;
+import org.fermented.dairy.caches.api.exceptions.CacheRuntimeException;
 import org.fermented.dairy.caches.api.functions.Loader;
 import org.fermented.dairy.caches.api.functions.OptionalLoader;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
@@ -144,13 +144,13 @@ public class HashMapCacheProvider implements CacheProvider {
     private void validateKeyClass(final Object key, final Class keyClass, final CacheHolder cacheHolder, final String cacheName) {
         final Object nonNullKey = Objects.requireNonNull(key, "the key cannot be null");
         if (!keyClass.isInstance(nonNullKey) || !cacheHolder.keyClass().isInstance(nonNullKey)) {
-            throw new CacheException("%s is not a valid key class for cache %s", nonNullKey.getClass().getCanonicalName(), cacheName);
+            throw new CacheRuntimeException("%s is not a valid key class for cache %s", nonNullKey.getClass().getCanonicalName(), cacheName);
         }
     }
 
     private void validateResultClass(final Object result, final Class resultClass, final CacheHolder cacheHolder, final String cacheName) {
         if (!resultClass.isInstance(result) || !cacheHolder.resultClass().isInstance(result)) {
-            throw new CacheException("%s is not a valid result class for cache %s", result.getClass().getCanonicalName(), cacheName);
+            throw new CacheRuntimeException("%s is not a valid result class for cache %s", result.getClass().getCanonicalName(), cacheName);
         }
     }
 
@@ -226,7 +226,7 @@ public class HashMapCacheProvider implements CacheProvider {
 
         public void setValue(final Object value) {
             if (this.value != null) {
-                throw new CacheException("values can only be set once");
+                throw new CacheRuntimeException("values can only be set once");
             }
             expiryTime = System.currentTimeMillis() + ttl; //refresh expiry time after value has been set
             this.value = value;

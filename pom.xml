@@ -25,6 +25,7 @@
         <module>fd-caches-annotations</module>
         <module>fd-caches-aop</module>
         <module>fd-caches-test</module>
+        <module>fd-caches-shared</module>
     </modules>
 
     <build>

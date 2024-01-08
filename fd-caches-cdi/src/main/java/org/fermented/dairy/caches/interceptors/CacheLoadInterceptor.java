@@ -1,7 +1,6 @@
 package org.fermented.dairy.caches.interceptors;
 
 import static org.fermented.dairy.caches.interceptors.PriorityValues.LOAD_INTERCEPTOR_PRIORITY;
-import static org.fermented.dairy.caches.interceptors.utils.Utils.initCacheNameMap;
 
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
@@ -14,8 +13,9 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 import org.eclipse.microprofile.config.Config;
 import org.fermented.dairy.caches.annotations.CacheLoad;
+import org.fermented.dairy.caches.api.exceptions.CacheException;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
-import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorException;
+import org.fermented.dairy.caches.handlers.AbstractCacheHandler;
 
 
 /**
@@ -25,17 +25,17 @@ import org.fermented.dairy.caches.interceptors.exceptions.CacheInterceptorExcept
 @CacheLoad
 @Dependent
 @Priority(LOAD_INTERCEPTOR_PRIORITY)
-public class CacheLoadInterceptor extends AbstractCacheInterceptor {
+public class CacheLoadInterceptor extends AbstractCacheHandler {
 
     /**
-     * Constructor.
+     * CDI compliant constructor.
      *
      * @param config Config
      * @param providers Injected CDI cache providers
      */
     @Inject
     public CacheLoadInterceptor(final Config config, final Instance<CacheProvider> providers) {
-        super(MicroProfileCacheConfig.using(config),  initCacheNameMap(providers));
+        super(MicroProfileCacheConfig.using(config),  providers);
     }
 
     /**
@@ -55,7 +55,7 @@ public class CacheLoadInterceptor extends AbstractCacheInterceptor {
         final Class<?> returnedClass = method.getReturnType();
 
         if (returnedClass.isAssignableFrom(void.class) || returnedClass.isAssignableFrom(Void.class)) {
-            throw new CacheInterceptorException("void types cannot be cached");
+            throw new CacheException("void types cannot be cached");
         }
         if (isCacheDisabled(method)) {
             return ctx.proceed();

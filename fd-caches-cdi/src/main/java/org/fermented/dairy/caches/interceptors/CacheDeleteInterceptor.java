@@ -1,7 +1,6 @@
 package org.fermented.dairy.caches.interceptors;
 
 import static org.fermented.dairy.caches.interceptors.PriorityValues.DELETE_INTERCEPTOR_PRIORITY;
-import static org.fermented.dairy.caches.interceptors.utils.Utils.initCacheNameMap;
 
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
@@ -15,6 +14,7 @@ import org.fermented.dairy.caches.annotations.CacheDelete;
 import org.fermented.dairy.caches.annotations.CacheLoad;
 import org.fermented.dairy.caches.annotations.Cached;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
+import org.fermented.dairy.caches.handlers.AbstractCacheHandler;
 
 
 /**
@@ -25,17 +25,17 @@ import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 @CacheDelete
 @Dependent
 @Priority(DELETE_INTERCEPTOR_PRIORITY)
-public class CacheDeleteInterceptor extends AbstractCacheInterceptor {
+public class CacheDeleteInterceptor extends AbstractCacheHandler {
 
     /**
-     * Constructor.
+     * CDI compliant constructor.
      *
      * @param config Config
      * @param providers Injected CDI cache providers
      */
     @Inject
     public CacheDeleteInterceptor(final Config config, final Instance<CacheProvider> providers) {
-        super(MicroProfileCacheConfig.using(config), initCacheNameMap(providers));
+        super(MicroProfileCacheConfig.using(config), providers);
     }
 
 

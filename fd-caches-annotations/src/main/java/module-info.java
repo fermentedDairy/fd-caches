@@ -2,7 +2,7 @@
  * module info for fd.caches.annotations.
  */
 module fd.caches.annotations {
-    requires jakarta.interceptor;
+    requires static jakarta.interceptor;
     exports org.fermented.dairy.caches.annotations;
 
 }

@@ -1,26 +1,96 @@
 package org.fermented.dairy.caches.aspects;
 
+import org.fermented.dairy.caches.api.functions.Loader;
+import org.fermented.dairy.caches.api.interfaces.CacheProvider;
+import org.fermented.dairy.caches.aspects.utils.AspectUtils;
 import org.fermented.dairy.caches.interceptors.beans.CacheBean;
 import org.fermented.dairy.caches.interceptors.entities.DefaultCacheEntityClass;
-import org.fermented.dairy.caches.interceptors.entities.NamedCachedBean;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.env.Environment;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Optional;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class CacheLoadAspectTest {
+
+    CacheLoadAspect cacheLoadAspect;
+
+    @Mock
+    CacheProvider defaultCacheProvider;
+
+    @Mock
+    CacheProvider cacheProvider1;
+
+    @Mock
+    CacheProvider cacheProvider2;
+
+    @Mock
+    Environment environment;
+
+    List<CacheProvider> cacheProviderInstances;
+
+    @BeforeEach
+    void init() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        initInjectedCacheInstances();
+    }
+
+    void initInjectedCacheInstances() {
+        cacheProviderInstances = List.of(
+                cacheProvider1, cacheProvider2, defaultCacheProvider
+        );
+        lenient().when(defaultCacheProvider.getProviderName()).thenReturn("default");
+        lenient().when(cacheProvider1.getProviderName()).thenReturn("cache1");
+        lenient().when(cacheProvider2.getProviderName()).thenReturn("cache2");
+        lenient().when(environment.getProperty("fd.config.cache.provider.default", String.class))
+                .thenReturn("default");
+        lenient().when(environment.getProperty("fd.config.cache.ttl.default", Long.class))
+                .thenReturn(3000L);
+        cacheLoadAspect = new CacheLoadAspect(environment, cacheProviderInstances);
+    }
 
     @DisplayName("""
             The intercepted method has a single unannotated param. Default cacheProvider is used.
              Method: DefaultCacheEntity defaultLoad(Long param)
             """)
     @Test
-    void singleUnannotatedDefaultCacheCorrectKeyType() throws Exception {
+    void singleUnannotatedDefaultCacheCorrectKeyType() throws Throwable {
         final Method interceptedMethod = CacheBean.class.getMethod("defaultLoad", Long.class);
-        fail("Not Implemented");
+        final Long key = 1L;
+        when(defaultCacheProvider.load(
+                any(Object.class),
+                any(Loader.class),
+                any(String.class),
+                any(Long.class),
+                any(Class.class),
+                any(Class.class)
+        )).thenAnswer(invocationOnMock -> {
+            assertAll("Validate Parameters",
+                    () -> assertEquals(key, invocationOnMock.getArgument(0), "Key is incorrect"),
+                    () -> assertEquals(DefaultCacheEntityClass.class.getCanonicalName(), invocationOnMock.getArgument(2), "Cache name is incorrect"),
+                    () -> assertEquals(3000L, (long)invocationOnMock.getArgument(3), "ttl is incorrect"),
+                    () -> assertEquals(Long.class, invocationOnMock.getArgument(4), "keyClass is incorrect"),
+                    () -> assertEquals(DefaultCacheEntityClass.class, invocationOnMock.getArgument(5), "valueClass is incorrect"));
+            return ((Loader)invocationOnMock.getArgument(1)).load(invocationOnMock.getArgument(0));
+        });
+        final Object actual = cacheLoadAspect.loadIntoCache(AspectUtils.getProceedingJoinPoint(
+                interceptedMethod,
+                new DefaultCacheEntityClass(key),
+                key));
+        assertEquals(new DefaultCacheEntityClass(1L), actual);
     }
 
     @DisplayName("""

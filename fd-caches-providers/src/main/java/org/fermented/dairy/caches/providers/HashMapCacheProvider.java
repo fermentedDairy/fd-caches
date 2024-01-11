@@ -8,6 +8,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import org.fermented.dairy.caches.api.exceptions.CacheException;
 import org.fermented.dairy.caches.api.exceptions.CacheRuntimeException;
 import org.fermented.dairy.caches.api.functions.Loader;
 import org.fermented.dairy.caches.api.functions.OptionalLoader;
@@ -180,6 +182,10 @@ public class HashMapCacheProvider implements CacheProvider {
             entryReference.get().setValue(loader.load(key));
             //noinspection DataFlowIssue
             return entryReference.get().getValue();
+        } catch (final Exception e) {
+            throw e;
+        } catch (final Throwable e) {
+            throw new CacheException(e);
         } finally {
             //noinspection DataFlowIssue
             entryReference.get().writeLock().unlock();

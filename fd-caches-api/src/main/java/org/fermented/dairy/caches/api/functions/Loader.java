@@ -18,5 +18,5 @@ public interface Loader<P, V> {
      *
      * @throws Exception The exception thrown by the loading lambda
      */
-    V load(P param) throws Exception;
+    V load(P param) throws Throwable;
 }

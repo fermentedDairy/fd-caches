@@ -35,7 +35,7 @@ public class NamedCacheProvider implements CacheProvider {
                                 loader.load(key),
                                 System.currentTimeMillis() + ttlMilliSeconds
                         );
-                    } catch (final Exception exc) {
+                    } catch (final Throwable exc) {
                         throw new RuntimeException(exc);
                     }
                 }

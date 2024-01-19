@@ -5,4 +5,5 @@ module fd.caches.aop {
     requires spring.beans;
     requires fd.caches.api;
     requires spring.context;
+    requires fd.caches.annotations;
 }

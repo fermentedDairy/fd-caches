@@ -34,6 +34,7 @@ public class CacheLoadAspect extends AbstractCacheHandler {
         final MethodSignature methodSignature = (MethodSignature) jp.getSignature();
         final Method method = methodSignature.getMethod();
         final Class<?> returnedClass = method.getReturnType();
+        final Object[] params = jp.getArgs();
 
         if (returnedClass.isAssignableFrom(void.class) || returnedClass.isAssignableFrom(Void.class)) {
             throw new CacheException("void types cannot be cached");
@@ -42,7 +43,6 @@ public class CacheLoadAspect extends AbstractCacheHandler {
             return jp.proceed();
         }
 
-        final Object[] params = jp.getArgs();
         final Object cacheKey = getCacheKey(method, params);
 
         if (returnedClass.isAssignableFrom(Optional.class)) {

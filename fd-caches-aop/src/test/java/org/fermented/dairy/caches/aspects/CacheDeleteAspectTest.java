@@ -1,36 +1,39 @@
-package org.fermented.dairy.caches.interceptors;
+package org.fermented.dairy.caches.aspects;
 
-import jakarta.enterprise.inject.Instance;
-import org.eclipse.microprofile.config.Config;
-import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 import org.fermented.dairy.caches.api.exceptions.CacheException;
+import org.fermented.dairy.caches.api.interfaces.CacheProvider;
+import org.fermented.dairy.caches.aspects.utils.AspectUtils;
 import org.fermented.dairy.caches.interceptors.beans.CacheBean;
 import org.fermented.dairy.caches.interceptors.entities.CacheRecord;
 import org.fermented.dairy.caches.interceptors.entities.DefaultCacheEntityClass;
 import org.fermented.dairy.caches.interceptors.entities.NamedCachedBean;
-import org.fermented.dairy.caches.interceptors.utils.ContextUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.env.Environment;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CacheProviderDeleteInterceptorTest {
+class CacheDeleteAspectTest {
 
-    CacheDeleteInterceptor cacheDeleteInterceptor;
+    CacheDeleteAspect cacheDeleteAspect;
 
     @Mock
-    Instance<CacheProvider> providers;
+    List<CacheProvider> providers;
 
     @Mock
     CacheProvider defaultCacheProvider;
@@ -42,7 +45,7 @@ class CacheProviderDeleteInterceptorTest {
     CacheProvider cacheProvider2;
 
     @Mock
-    Config config;
+    Environment environment;
 
     List<CacheProvider> cacheProviderInstances;
 
@@ -59,11 +62,11 @@ class CacheProviderDeleteInterceptorTest {
         lenient().when(cacheProvider1.getProviderName()).thenReturn("cache1");
         lenient().when(cacheProvider2.getProviderName()).thenReturn("cache2");
         lenient().when(providers.spliterator()).thenReturn(cacheProviderInstances.spliterator());
-        lenient().when(config.getOptionalValue("fd.config.cache.provider.default", String.class))
-                .thenReturn(Optional.of("default"));
-        lenient().when(config.getOptionalValue("fd.config.cache.ttl.default", Long.class))
-                .thenReturn(Optional.of(3000L));
-        cacheDeleteInterceptor = new CacheDeleteInterceptor(config, providers);
+        lenient().when(environment.getProperty("fd.config.cache.provider.default", String.class))
+                .thenReturn("default");
+        lenient().when(environment.getProperty("fd.config.cache.ttl.default", Long.class))
+                .thenReturn(3000L);
+        cacheDeleteAspect = new CacheDeleteAspect(environment, providers);
     }
 
     @DisplayName("""
@@ -71,11 +74,11 @@ class CacheProviderDeleteInterceptorTest {
              Method: DefaultCacheEntityClass deleteDefault(Long key)\s
             """)
     @Test
-    void defaultDeleteSingleParam() throws Exception {
+    void defaultDeleteSingleParam() throws Throwable {
 
         final Method interceptedMethod = CacheBean.class.getMethod("deleteDefault", Long.class);
         final DefaultCacheEntityClass expectedObject = new DefaultCacheEntityClass(1L);
-        final Object actual = cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, expectedObject, 1L));
+        final Object actual = cacheDeleteAspect.deleteFromCache(AspectUtils.getProceedingJoinPoint(interceptedMethod, expectedObject, 1L));
         assertSame(actual, expectedObject, "Incorrect object returned");
         verify(defaultCacheProvider).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
     }
@@ -85,12 +88,12 @@ class CacheProviderDeleteInterceptorTest {
              Method: DefaultCacheEntityClass deleteDefault(Object dummy, @CacheKey Long key)\s
             """)
     @Test
-    void defaultDeleteMultipleParamWithAnnotation() throws Exception {
+    void defaultDeleteMultipleParamWithAnnotation() throws Throwable {
 
         final Method interceptedMethod = CacheBean.class.getMethod("deleteDefault", Object.class, Long.class);
 
         final DefaultCacheEntityClass expectedObject = new DefaultCacheEntityClass(1L);
-        final Object actual = cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, expectedObject, new Object(), 1L));
+        final Object actual = cacheDeleteAspect.deleteFromCache(AspectUtils.getProceedingJoinPoint(interceptedMethod, expectedObject, new Object(), 1L));
 
         assertSame(actual, expectedObject, "Incorrect object returned");
         verify(defaultCacheProvider).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
@@ -101,10 +104,10 @@ class CacheProviderDeleteInterceptorTest {
              Method: void deleteDefault(Long dummy, Long key)\s
             """)
     @Test
-    void defaultDeleteMultipleParamWithoutAnnotation() throws Exception {
+    void defaultDeleteMultipleParamWithoutAnnotation() throws Throwable {
         final Method interceptedMethod = CacheBean.class.getMethod("deleteDefault", Long.class, Long.class);
         final CacheException actualException = assertThrows(CacheException.class,
-                () -> cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L), 2L, 1L)));
+                () -> cacheDeleteAspect.deleteFromCache(AspectUtils.getProceedingJoinPoint(interceptedMethod, new DefaultCacheEntityClass(1L), 2L, 1L)));
         verify(defaultCacheProvider, never()).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
         assertEquals("No parameter is on annotated with the 'CacheKey' annotation or is a cached bean for method deleteDefault in class, could not determine cache key.",
                 actualException.getMessage());
@@ -112,28 +115,28 @@ class CacheProviderDeleteInterceptorTest {
 
     @DisplayName("""
             The intercepted method has a single parameter, delete in named cacheProvider
-             Method: NamedCachedBean deleteNamed(Long key)\s
+             Method: void deleteDefault(Long key)\s
             """)
     @Test
-    void namedDeleteSingleParam() throws Exception {
+    void namedDeleteSingleParam() throws Throwable {
 
         final Method interceptedMethod = CacheBean.class.getMethod("deleteNamed", Long.class);
         final NamedCachedBean expectedObject = new NamedCachedBean(1L);
-        final Object actual = cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, expectedObject, 1L));
+        final Object actual = cacheDeleteAspect.deleteFromCache(AspectUtils.getProceedingJoinPoint(interceptedMethod, expectedObject, 1L));
         assertSame(actual, expectedObject, "Incorrect object returned");
         verify(cacheProvider1).removeValue("overriddenCacheName", 1L);
     }
 
     @DisplayName("""
             The intercepted method has 2 parameters, one annotated as the key, delete in named cacheProvider
-             Method: NamedCachedBean deleteNamed(Object dummy, @CacheKey Long key)\s
+             Method: void deleteDefault(Object dummy, @CacheKey Long key)\s
             """)
     @Test
-    void namedDeleteMultipleParamWithAnnotation() throws Exception {
+    void namedDeleteMultipleParamWithAnnotation() throws Throwable {
 
         final Method interceptedMethod = CacheBean.class.getMethod("deleteNamed", Object.class, Long.class);
         final NamedCachedBean expectedObject = new NamedCachedBean(1L);
-        final Object actual = cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, expectedObject, new Object(), 1L));
+        final Object actual = cacheDeleteAspect.deleteFromCache(AspectUtils.getProceedingJoinPoint(interceptedMethod, expectedObject, new Object(), 1L));
 
         assertSame(actual, expectedObject, "Incorrect object returned");
         verify(cacheProvider1).removeValue("overriddenCacheName", 1L);
@@ -141,13 +144,13 @@ class CacheProviderDeleteInterceptorTest {
 
     @DisplayName("""
             The intercepted method has 2 parameters, none annotated as the key, exception thrown
-             Method: NamedCachedBean deleteNamed(Long dummy, Long key)\s
+             Method: void deleteDefault(Long dummy, Long key)\s
             """)
     @Test
-    void namedDeleteMultipleParamWithoutAnnotation() throws Exception {
+    void namedDeleteMultipleParamWithoutAnnotation() throws Throwable {
         final Method interceptedMethod = CacheBean.class.getMethod("deleteNamed", Long.class, Long.class);
         final CacheException actualException = assertThrows(CacheException.class,
-                () -> cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L), new Object(), 1L)));
+                () -> cacheDeleteAspect.deleteFromCache(AspectUtils.getProceedingJoinPoint(interceptedMethod, new DefaultCacheEntityClass(1L), new Object(), 1L)));
         verify(defaultCacheProvider, never()).removeValue(DefaultCacheEntityClass.class.getCanonicalName(), 1L);
         assertEquals("No parameter is on annotated with the 'CacheKey' annotation or is a cached bean for method deleteNamed in class, could not determine cache key.",
                 actualException.getMessage());
@@ -155,36 +158,36 @@ class CacheProviderDeleteInterceptorTest {
 
     @DisplayName("""
             The intercepted method has a single parameter, delete in configured cacheProvider
-             Method: NamedCachedBean deleteNamed(Long key)\s
+             Method: void deleteDefault(Long key)\s
             """)
     @Test
-    void configuredDeleteSingleParam() throws Exception {
+    void configuredDeleteSingleParam() throws Throwable {
 
-        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cacheprovider", String.class)).thenReturn(Optional.of("cache2"));
-        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cachename", String.class)).thenReturn(Optional.of("configuredCacheName"));
+        when(environment.getProperty("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cacheprovider", String.class)).thenReturn("cache2");
+        when(environment.getProperty("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cachename", String.class)).thenReturn("configuredCacheName");
 
 
         final Method interceptedMethod = CacheBean.class.getMethod("deleteNamed", Long.class);
 
         final NamedCachedBean expectedObject = new NamedCachedBean(1L);
-        final Object actual = cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, expectedObject, 1L));
+        final Object actual = cacheDeleteAspect.deleteFromCache(AspectUtils.getProceedingJoinPoint(interceptedMethod, expectedObject, 1L));
         assertSame(actual, expectedObject, "Incorrect object returned");
         verify(cacheProvider2).removeValue("configuredCacheName", 1L);
     }
 
     @DisplayName("""
             The intercepted method has 2 parameters, one annotated as the key, delete in configured cacheProvider
-             Method: NamedCachedBean deleteNamed(Object dummy, @CacheKey Long key)\s
+             Method: void deleteDefault(Object dummy, @CacheKey Long key)\s
             """)
     @Test
-    void configuredDeleteMultipleParamWithAnnotation() throws Exception {
+    void configuredDeleteMultipleParamWithAnnotation() throws Throwable {
 
-        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cacheprovider", String.class)).thenReturn(Optional.of("cache2"));
-        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cachename", String.class)).thenReturn(Optional.of("configuredCacheName"));
+        when(environment.getProperty("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cacheprovider", String.class)).thenReturn("cache2");
+        when(environment.getProperty("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cachename", String.class)).thenReturn("configuredCacheName");
 
         final Method interceptedMethod = CacheBean.class.getMethod("deleteNamed", Object.class, Long.class);
         final NamedCachedBean expectedObject = new NamedCachedBean(1L);
-        final Object actual = cacheDeleteInterceptor.deleteFromCache(ContextUtils.getInvocationContext(interceptedMethod, expectedObject, new Object(), 1L));
+        final Object actual = cacheDeleteAspect.deleteFromCache(AspectUtils.getProceedingJoinPoint(interceptedMethod, expectedObject, new Object(), 1L));
 
         assertSame(actual, expectedObject, "Incorrect object returned");
         verify(cacheProvider2).removeValue("configuredCacheName", 1L);
@@ -195,12 +198,12 @@ class CacheProviderDeleteInterceptorTest {
              Method: DefaultCacheEntityClass deleteDefault(DefaultCacheEntityClass key)\s
             """)
     @Test
-    void defaultDeleteSingleParamCachedObject() throws Exception {
+    void defaultDeleteSingleParamCachedObject() throws Throwable {
 
         final Method interceptedMethod = CacheBean.class.getMethod("deleteDefault", DefaultCacheEntityClass.class);
         final DefaultCacheEntityClass expectedObject = new DefaultCacheEntityClass(1L);
-        final Object actual = cacheDeleteInterceptor.deleteFromCache(
-                ContextUtils.getInvocationContext(
+        final Object actual = cacheDeleteAspect.deleteFromCache(
+                AspectUtils.getProceedingJoinPoint(
                         interceptedMethod,
                         expectedObject,
                         expectedObject)
@@ -214,13 +217,13 @@ class CacheProviderDeleteInterceptorTest {
              Method: DefaultCacheEntityClass deleteDefault(Object dummy, DefaultCacheEntityClass key)\s
             """)
     @Test
-    void defaultDeleteMultipleParamNoneIsCachedBean() throws Exception {
+    void defaultDeleteMultipleParamNoneIsCachedBean() throws Throwable {
 
         final Method interceptedMethod = CacheBean.class.getMethod("deleteDefault", Long.class, DefaultCacheEntityClass.class);
 
         final DefaultCacheEntityClass expectedObject = new DefaultCacheEntityClass(1L);
-        final Object actual = cacheDeleteInterceptor.deleteFromCache(
-                ContextUtils.getInvocationContext(
+        final Object actual = cacheDeleteAspect.deleteFromCache(
+                AspectUtils.getProceedingJoinPoint(
                         interceptedMethod,
                         expectedObject,
                         new Object(),
@@ -231,15 +234,15 @@ class CacheProviderDeleteInterceptorTest {
 
     @DisplayName("""
             The intercepted method has a single parameter that is a named cached bean, delete in named cacheProvider
-             Method: NamedCachedBean deleteNamed(NamedCachedBean toDelete)\s
+             Method: DefaultCacheEntityClass deleteNamed(NamedCachedBean toDelete)\s
             """)
     @Test
-    void defaultDeleteSingleParamNamedCachedObject() throws Exception {
+    void defaultDeleteSingleParamNamedCachedObject() throws Throwable {
 
         final Method interceptedMethod = CacheBean.class.getMethod("deleteNamed", NamedCachedBean.class);
         final NamedCachedBean expectedObject = new NamedCachedBean(1L);
-        final Object actual = cacheDeleteInterceptor.deleteFromCache(
-                ContextUtils.getInvocationContext(
+        final Object actual = cacheDeleteAspect.deleteFromCache(
+                AspectUtils.getProceedingJoinPoint(
                         interceptedMethod,
                         expectedObject,
                         expectedObject)
@@ -253,13 +256,13 @@ class CacheProviderDeleteInterceptorTest {
              Method: DefaultCacheEntityClass deleteNamed(Long ignoredDummy, NamedCachedBean toDelete)\s
             """)
     @Test
-    void defaultDeleteMultipleParamOneIsNamedCachedBean() throws Exception {
+    void defaultDeleteMultipleParamOneIsNamedCachedBean() throws Throwable {
 
         final Method interceptedMethod = CacheBean.class.getMethod("deleteNamed", Long.class, NamedCachedBean.class);
 
         final NamedCachedBean expectedObject = new NamedCachedBean(1L);
-        final Object actual = cacheDeleteInterceptor.deleteFromCache(
-                ContextUtils.getInvocationContext(
+        final Object actual = cacheDeleteAspect.deleteFromCache(
+                AspectUtils.getProceedingJoinPoint(
                         interceptedMethod,
                         expectedObject,
                         new Object(),
@@ -272,18 +275,18 @@ class CacheProviderDeleteInterceptorTest {
 
     @DisplayName("""
             The intercepted method has a single parameter that is a named configured cached bean, delete in named configured cacheProvider
-             Method: DefaultCacheEntityClass deleteNamed(NamedCachedBean key)\s
+             Method: DefaultCacheEntityClass deleteDefault(DefaultCacheEntityClass key)\s
             """)
     @Test
-    void defaultDeleteSingleParamNamedConfiguredCachedObject() throws Exception {
+    void defaultDeleteSingleParamNamedConfiguredCachedObject() throws Throwable {
 
-        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cacheprovider", String.class)).thenReturn(Optional.of("cache2"));
-        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cachename", String.class)).thenReturn(Optional.of("configuredCacheName"));
+        when(environment.getProperty("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cacheprovider", String.class)).thenReturn("cache2");
+        when(environment.getProperty("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cachename", String.class)).thenReturn("configuredCacheName");
 
         final Method interceptedMethod = CacheBean.class.getMethod("deleteNamed", NamedCachedBean.class);
         final NamedCachedBean expectedObject = new NamedCachedBean(1L);
-        final Object actual = cacheDeleteInterceptor.deleteFromCache(
-                ContextUtils.getInvocationContext(
+        final Object actual = cacheDeleteAspect.deleteFromCache(
+                AspectUtils.getProceedingJoinPoint(
                         interceptedMethod,
                         expectedObject,
                         expectedObject)
@@ -294,19 +297,19 @@ class CacheProviderDeleteInterceptorTest {
 
     @DisplayName("""
             The intercepted method has 2 parameters, one is a named cached bean with config, delete in named configured cacheProvider
-             Method: DefaultCacheEntityClass deleteNamed(Object dummy, NamedCachedBean toDelete)\s
+             Method: DefaultCacheEntityClass deleteDefault(Object dummy, DefaultCacheEntityClass key)\s
             """)
     @Test
-    void defaultDeleteMultipleParamOneIsNamedConfiguredCachedBean() throws Exception {
+    void defaultDeleteMultipleParamOneIsNamedConfiguredCachedBean() throws Throwable {
 
-        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cacheprovider", String.class)).thenReturn(Optional.of("cache2"));
-        when(config.getOptionalValue("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cachename", String.class)).thenReturn(Optional.of("configuredCacheName"));
+        when(environment.getProperty("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cacheprovider", String.class)).thenReturn("cache2");
+        when(environment.getProperty("fd.config.cache." + NamedCachedBean.class.getCanonicalName() + ".cachename", String.class)).thenReturn("configuredCacheName");
 
         final Method interceptedMethod = CacheBean.class.getMethod("deleteNamed", Long.class, NamedCachedBean.class);
 
         final NamedCachedBean expectedObject = new NamedCachedBean(1L);
-        final Object actual = cacheDeleteInterceptor.deleteFromCache(
-                ContextUtils.getInvocationContext(
+        final Object actual = cacheDeleteAspect.deleteFromCache(
+                AspectUtils.getProceedingJoinPoint(
                         interceptedMethod,
                         expectedObject,
                         new Object(),
@@ -322,12 +325,12 @@ class CacheProviderDeleteInterceptorTest {
              Method: DefaultCacheEntityClass deleteRecord(CacheRecord toDelete)\s
             """)
     @Test
-    void defaultDeleteSingleParamDefaultCachedRecord() throws Exception {
+    void defaultDeleteSingleParamDefaultCachedRecord() throws Throwable {
 
         final Method interceptedMethod = CacheBean.class.getMethod("deleteRecord", CacheRecord.class);
         final CacheRecord expectedObject = new CacheRecord(1L);
-        final Object actual = cacheDeleteInterceptor.deleteFromCache(
-                ContextUtils.getInvocationContext(
+        final Object actual = cacheDeleteAspect.deleteFromCache(
+                AspectUtils.getProceedingJoinPoint(
                         interceptedMethod,
                         expectedObject,
                         expectedObject)
@@ -341,12 +344,12 @@ class CacheProviderDeleteInterceptorTest {
              Method: DefaultCacheEntityClass deleteRecord(Long ignoredDummy, CacheRecord toDelete)\s
             """)
     @Test
-    void defaultDeleteMultipleParamDefaultCachedRecord() throws Exception {
+    void defaultDeleteMultipleParamDefaultCachedRecord() throws Throwable {
 
         final Method interceptedMethod = CacheBean.class.getMethod("deleteRecord", Long.class, CacheRecord.class);
         final CacheRecord expectedObject = new CacheRecord(1L);
-        final Object actual = cacheDeleteInterceptor.deleteFromCache(
-                ContextUtils.getInvocationContext(
+        final Object actual = cacheDeleteAspect.deleteFromCache(
+                AspectUtils.getProceedingJoinPoint(
                         interceptedMethod,
                         expectedObject,
                         expectedObject)
@@ -354,4 +357,5 @@ class CacheProviderDeleteInterceptorTest {
         assertSame(actual, expectedObject, "Incorrect object returned");
         verify(defaultCacheProvider).removeValue(CacheRecord.class.getCanonicalName(), 1L);
     }
+
 }

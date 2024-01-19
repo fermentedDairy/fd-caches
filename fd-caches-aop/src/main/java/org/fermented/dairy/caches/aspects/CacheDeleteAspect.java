@@ -5,7 +5,6 @@ import java.util.List;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.fermented.dairy.caches.annotations.Cached;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 import org.fermented.dairy.caches.handlers.AbstractCacheHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,17 +28,11 @@ public class CacheDeleteAspect extends AbstractCacheHandler {
     public Object deleteFromCache(final ProceedingJoinPoint jp) throws Throwable {
         final MethodSignature methodSignature = (MethodSignature) jp.getSignature();
         final Method method = methodSignature.getMethod();
-        final Class<?> returnedClass = method.getReturnType();
         final Object[] params = jp.getArgs();
 
-        final CacheProvider cacheProvider = getCacheForDelete(method);
-        final String cacheName = getCacheNameForDelete(method);
-        Object key = getCacheKey(method, params);
-        if (key.getClass().isAnnotationPresent(Cached.class)) {
-            key = getKeyFromCachedClass(key);
-        }
+        deleteFromCache(method, params);
 
-        cacheProvider.removeValue(cacheName, key);
         return jp.proceed();
     }
+
 }

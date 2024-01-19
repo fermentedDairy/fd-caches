@@ -8,6 +8,8 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.fermented.dairy.caches.api.exceptions.CacheException;
+import org.fermented.dairy.caches.api.functions.Loader;
+import org.fermented.dairy.caches.api.functions.Proceeder;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 import org.fermented.dairy.caches.handlers.AbstractCacheHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,32 +37,10 @@ public class CacheLoadAspect extends AbstractCacheHandler {
         final Method method = methodSignature.getMethod();
         final Class<?> returnedClass = method.getReturnType();
         final Object[] params = jp.getArgs();
+        final Loader<Object, Object> loader = param -> jp.proceed();
+        final Proceeder<Object> proceeder = () -> jp.proceed();
 
-        if (returnedClass.isAssignableFrom(void.class) || returnedClass.isAssignableFrom(Void.class)) {
-            throw new CacheException("void types cannot be cached");
-        }
-        if (isCacheDisabled(method)) {
-            return jp.proceed();
-        }
-
-        final Object cacheKey = getCacheKey(method, params);
-
-        if (returnedClass.isAssignableFrom(Optional.class)) {
-            final Class<?> returnOptionalClass = getActualReturnedClass(method);
-            return getCacheForLoad(method).loadOptional(cacheKey,
-                    param -> (Optional) jp.proceed(),
-                    getCacheName(method),
-                    getTtl(method),
-                    cacheKey.getClass(),
-                    returnOptionalClass);
-        } else {
-            return getCacheForLoad(method).load(cacheKey,
-                    param -> jp.proceed(),
-                    getCacheName(method),
-                    getTtl(method),
-                    cacheKey.getClass(),
-                    returnedClass);
-        }
+        return LoadOnCacheMiss(returnedClass, method, proceeder, params, loader);
 
     }
 }

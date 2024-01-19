@@ -49,14 +49,7 @@ public class CacheDeleteInterceptor extends AbstractCacheHandler {
     @AroundInvoke
     public Object deleteFromCache(final InvocationContext ctx) throws Exception {
 
-        final CacheProvider cacheProvider = getCacheForDelete(ctx.getMethod());
-        final String cacheName = getCacheNameForDelete(ctx.getMethod());
-        Object key = getCacheKey(ctx.getMethod(), ctx.getParameters());
-        if (key.getClass().isAnnotationPresent(Cached.class)) {
-            key = getKeyFromCachedClass(key);
-        }
-
-        cacheProvider.removeValue(cacheName, key);
+        deleteFromCache(ctx.getMethod(), ctx.getParameters());
         return ctx.proceed();
     }
 

@@ -16,6 +16,8 @@ import org.fermented.dairy.caches.annotations.Cached;
 import org.fermented.dairy.caches.annotations.CachedType;
 import org.fermented.dairy.caches.api.exceptions.CacheException;
 import org.fermented.dairy.caches.api.exceptions.CacheRuntimeException;
+import org.fermented.dairy.caches.api.functions.Loader;
+import org.fermented.dairy.caches.api.functions.Proceeder;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 
 
@@ -260,5 +262,43 @@ public class AbstractCacheHandler {
                 CacheProvider::getProviderName,
                 Function.identity()
         ));
+    }
+
+    protected void deleteFromCache(Method method, Object[] params) throws CacheException {
+        final CacheProvider cacheProvider = getCacheForDelete(method);
+        final String cacheName = getCacheNameForDelete(method);
+        Object key = getCacheKey(method, params);
+        if (key.getClass().isAnnotationPresent(Cached.class)) {
+            key = getKeyFromCachedClass(key);
+        }
+
+        cacheProvider.removeValue(cacheName, key);
+    }
+
+    protected Object LoadOnCacheMiss(Class<?> returnedClass, Method method, Proceeder<Object> proceeder, Object[] params, Loader<Object, Object> loader) throws Throwable {
+        if (returnedClass.isAssignableFrom(void.class) || returnedClass.isAssignableFrom(Void.class)) {
+            throw new CacheException("void types cannot be cached");
+        }
+        if (isCacheDisabled(method)) {
+            return proceeder.proceed();
+        }
+        final Object cacheKey = getCacheKey(method, params);
+
+        if (returnedClass.isAssignableFrom(Optional.class)) {
+            final Class<?> returnOptionalClass = getActualReturnedClass(method);
+            return getCacheForLoad(method).loadOptional(cacheKey,
+                    param -> (Optional) loader.load(param),
+                    getCacheName(method),
+                    getTtl(method),
+                    cacheKey.getClass(),
+                    returnOptionalClass);
+        } else {
+            return getCacheForLoad(method).load(cacheKey,
+                    loader,
+                    getCacheName(method),
+                    getTtl(method),
+                    cacheKey.getClass(),
+                    returnedClass);
+        }
     }
 }

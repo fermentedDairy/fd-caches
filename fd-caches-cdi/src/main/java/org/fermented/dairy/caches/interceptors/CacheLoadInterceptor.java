@@ -10,10 +10,11 @@ import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 import java.lang.reflect.Method;
-import java.util.Optional;
+
 import org.eclipse.microprofile.config.Config;
 import org.fermented.dairy.caches.annotations.CacheLoad;
-import org.fermented.dairy.caches.api.exceptions.CacheException;
+import org.fermented.dairy.caches.api.functions.Loader;
+import org.fermented.dairy.caches.api.functions.Proceeder;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 import org.fermented.dairy.caches.handlers.AbstractCacheHandler;
 
@@ -48,38 +49,16 @@ public class CacheLoadInterceptor extends AbstractCacheHandler {
      * @throws Exception Exception thrown by the caching implementation or the target method.
      */
     @AroundInvoke
-    public Object loadIntoCache(final InvocationContext ctx) throws Exception {
+    public Object loadIntoCache(final InvocationContext ctx) throws Throwable {
 
 
         final Method method = ctx.getMethod();
         final Class<?> returnedClass = method.getReturnType();
-
-        if (returnedClass.isAssignableFrom(void.class) || returnedClass.isAssignableFrom(Void.class)) {
-            throw new CacheException("void types cannot be cached");
-        }
-        if (isCacheDisabled(method)) {
-            return ctx.proceed();
-        }
-
         final Object[] params = ctx.getParameters();
-        final Object cacheKey = getCacheKey(method, params);
+        final Loader<Object, Object> loader = param -> ctx.proceed();
+        final Proceeder<Object> proceeder = () -> ctx.proceed();
 
-        if (returnedClass.isAssignableFrom(Optional.class)) {
-            final Class<?> returnOptionalClass = getActualReturnedClass(method);
-            return getCacheForLoad(method).loadOptional(cacheKey,
-                    param -> (Optional) ctx.proceed(),
-                    getCacheName(method),
-                    getTtl(method),
-                    cacheKey.getClass(),
-                    returnOptionalClass);
-        } else {
-            return getCacheForLoad(method).load(cacheKey,
-                    param -> ctx.proceed(),
-                    getCacheName(method),
-                    getTtl(method),
-                    cacheKey.getClass(),
-                    returnedClass);
-        }
+        return LoadOnCacheMiss(returnedClass, method, proceeder, params, loader);
     }
 
 }

@@ -78,7 +78,7 @@ class CacheProviderLoadInterceptorTest {
              Method: DefaultCacheEntity defaultLoad(Long param)
             """)
     @Test
-    void singleUnannotatedDefaultCacheCorrectKeyType() throws Exception {
+    void singleUnannotatedDefaultCacheCorrectKeyType() throws Throwable {
         final Method interceptedMethod = CacheBean.class.getMethod("defaultLoad", Long.class);
         final Long key = 1L;
         when(defaultCacheProvider.load(
@@ -106,7 +106,7 @@ class CacheProviderLoadInterceptorTest {
              Method: NamedCachedBean namedLoad(Long param)
             """)
     @Test
-    void singleUnannotatedOverriddenCacheCorrectKeyType() throws Exception {
+    void singleUnannotatedOverriddenCacheCorrectKeyType() throws Throwable {
         final Method interceptedMethod = CacheBean.class.getMethod("namedLoad", Long.class);
         final Long key = 1L;
         when(cacheProvider1.load(
@@ -134,7 +134,7 @@ class CacheProviderLoadInterceptorTest {
              Method: NamedCachedBean namedLoad(Long param)
             """)
     @Test
-    void singleUnannotatedOverriddenCacheCorrectKeyTypeConfigOverrides() throws Exception {
+    void singleUnannotatedOverriddenCacheCorrectKeyTypeConfigOverrides() throws Throwable {
 
         final Method interceptedMethod = CacheBean.class.getMethod("namedLoad", Long.class);
         final Long key = 1L;
@@ -169,7 +169,7 @@ class CacheProviderLoadInterceptorTest {
              Method: NamedCachedBean namedLoad(Long param)
             """)
     @Test
-    void singleUnannotatedOverriddenCacheCorrectKeyTypeConfigCacheDisabled() throws Exception {
+    void singleUnannotatedOverriddenCacheCorrectKeyTypeConfigCacheDisabled() throws Throwable {
 
         final Method interceptedMethod = CacheBean.class.getMethod("namedLoad", Long.class);
         final Long key = 1L;
@@ -209,7 +209,7 @@ class CacheProviderLoadInterceptorTest {
              Method: DefaultCacheEntityClass defaultLoad(Object dummy, @CacheKey Long param)
             """)
     @Test
-    void singleUnannotatedDefaultCacheCorrectAnnotatedKeyInParamsType() throws Exception {
+    void singleUnannotatedDefaultCacheCorrectAnnotatedKeyInParamsType() throws Throwable {
         final Method interceptedMethod = CacheBean.class.getMethod("defaultLoad", Object.class, Long.class);
         final Long key = 1L;
 
@@ -238,7 +238,7 @@ class CacheProviderLoadInterceptorTest {
              Method: DefaultCacheEntity defaultLoad(Long dummy, Long param)
             """)
     @Test
-    void singleUnannotatedDefaultCacheNoAnnotatedKeyInParamsType() throws Exception {
+    void singleUnannotatedDefaultCacheNoAnnotatedKeyInParamsType() throws Throwable {
         final Method interceptedMethod = CacheBean.class.getMethod("defaultLoad", Long.class, Long.class);
         final Long key = 1L;
 
@@ -253,7 +253,7 @@ class CacheProviderLoadInterceptorTest {
              Method: Optional<DefaultCacheEntity> defaultOptionalLoad(Long param)
             """)
     @Test
-    void singleUnannotatedOptionalDefaultCacheCorrectKeyType() throws Exception {
+    void singleUnannotatedOptionalDefaultCacheCorrectKeyType() throws Throwable {
         final Method interceptedMethod = CacheBean.class.getMethod("defaultOptionalLoad", Long.class);
         final Long key = 1L;
 
@@ -282,7 +282,7 @@ class CacheProviderLoadInterceptorTest {
              Method: Optional<NamedCachedBean> namedOptionalLoad(Long param)
             """)
     @Test
-    void singleUnannotatedOptionalNamedCacheCorrectKeyType() throws Exception {
+    void singleUnannotatedOptionalNamedCacheCorrectKeyType() throws Throwable {
         final Method interceptedMethod = CacheBean.class.getMethod("namedOptionalLoad", Long.class);
         final Long key = 1L;
         when(cacheProvider1.loadOptional(
@@ -310,7 +310,7 @@ class CacheProviderLoadInterceptorTest {
              Method: Optional<NamedCachedBean> namedOptionalLoad(Long param)
             """)
     @Test
-    void singleUnannotatedOptionalNamedCacheCorrectKeyTypeConfigDisabled() throws Exception {
+    void singleUnannotatedOptionalNamedCacheCorrectKeyTypeConfigDisabled() throws Throwable {
         final Method interceptedMethod = CacheBean.class.getMethod("namedOptionalLoad", Long.class);
         final Long key = 1L;
 
@@ -349,7 +349,7 @@ class CacheProviderLoadInterceptorTest {
              Method: Optional<NamedCachedBean> namedOptionalLoad(Long param)
             """)
     @Test
-    void singleUnannotatedOptionalNamedCacheCorrectKeyTypeConfigOverrides() throws Exception {
+    void singleUnannotatedOptionalNamedCacheCorrectKeyTypeConfigOverrides() throws Throwable {
         final Method interceptedMethod = CacheBean.class.getMethod("namedOptionalLoad", Long.class);
         final Long key = 1L;
 
@@ -383,7 +383,7 @@ class CacheProviderLoadInterceptorTest {
              Method: Optional<DefaultCacheEntityClass> defaultOptionalLoad(Object dummy, @CacheKey Long param)
             """)
     @Test
-    void singleUnannotatedOptionalDefaultCacheCorrectKeyAnnotatedType() throws Exception {
+    void singleUnannotatedOptionalDefaultCacheCorrectKeyAnnotatedType() throws Throwable {
         final Method interceptedMethod = CacheBean.class.getMethod("defaultOptionalLoad", Object.class, Long.class);
         final Long key = 1L;
         when(defaultCacheProvider.loadOptional(
@@ -411,7 +411,7 @@ class CacheProviderLoadInterceptorTest {
              Method: Optional<DefaultCacheEntityClass> defaultOptionalLoad(Long dummy, Long param)
             """)
     @Test
-    void singleUnannotatedDefaultCacheOptionalNoAnnotatedKeyInParamsType() throws Exception {
+    void singleUnannotatedDefaultCacheOptionalNoAnnotatedKeyInParamsType() throws Throwable {
         final Method interceptedMethod = CacheBean.class.getMethod("defaultOptionalLoad", Long.class, Long.class);
 
         final CacheException actualException = assertThrows(CacheException.class, () -> cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L), 1234L, 1L)));
@@ -424,7 +424,7 @@ class CacheProviderLoadInterceptorTest {
              Method: DefaultCacheEntity defaultLoad()
             """)
     @Test
-    void singleUnannotatedDefaultCacheNoParamsType() throws Exception {
+    void singleUnannotatedDefaultCacheNoParamsType() throws Throwable {
         final Method interceptedMethod = CacheBean.class.getMethod("defaultLoad");
 
         final CacheException actualException = assertThrows(CacheException.class, () -> cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L))));
@@ -437,7 +437,7 @@ class CacheProviderLoadInterceptorTest {
              Method: void loadVoid(Long param)
             """)
     @Test
-    void singleUnannotatedDefaultCacheVoidReturnType() throws Exception {
+    void singleUnannotatedDefaultCacheVoidReturnType() throws Throwable {
         final Method interceptedMethod = CacheBean.class.getMethod("loadVoid", Long.class);
 
         final CacheException actualException = assertThrows(CacheException.class, () -> cacheLoadInterceptor.loadIntoCache(ContextUtils.getInvocationContext(interceptedMethod, new DefaultCacheEntityClass(1L))));

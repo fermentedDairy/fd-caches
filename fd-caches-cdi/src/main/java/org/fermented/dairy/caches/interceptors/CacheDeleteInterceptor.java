@@ -12,7 +12,6 @@ import jakarta.interceptor.InvocationContext;
 import org.eclipse.microprofile.config.Config;
 import org.fermented.dairy.caches.annotations.CacheDelete;
 import org.fermented.dairy.caches.annotations.CacheLoad;
-import org.fermented.dairy.caches.annotations.Cached;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 import org.fermented.dairy.caches.handlers.AbstractCacheHandler;
 

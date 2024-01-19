@@ -264,7 +264,7 @@ public class AbstractCacheHandler {
         ));
     }
 
-    protected void deleteFromCache(Method method, Object[] params) throws CacheException {
+    protected void deleteFromCache(final Method method, final Object[] params) throws CacheException {
         final CacheProvider cacheProvider = getCacheForDelete(method);
         final String cacheName = getCacheNameForDelete(method);
         Object key = getCacheKey(method, params);
@@ -275,7 +275,11 @@ public class AbstractCacheHandler {
         cacheProvider.removeValue(cacheName, key);
     }
 
-    protected Object LoadOnCacheMiss(Class<?> returnedClass, Method method, Proceeder<Object> proceeder, Object[] params, Loader<Object, Object> loader) throws Throwable {
+    protected Object loadOnCacheMiss(final Class<?> returnedClass,
+                                     final Method method,
+                                     final Proceeder<Object> proceeder,
+                                     final Object[] params,
+                                     final Loader<Object, Object> loader) throws Throwable {
         if (returnedClass.isAssignableFrom(void.class) || returnedClass.isAssignableFrom(Void.class)) {
             throw new CacheException("void types cannot be cached");
         }

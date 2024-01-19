@@ -2,12 +2,10 @@ package org.fermented.dairy.caches.aspects;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Optional;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.fermented.dairy.caches.api.exceptions.CacheException;
 import org.fermented.dairy.caches.api.functions.Loader;
 import org.fermented.dairy.caches.api.functions.Proceeder;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
@@ -38,9 +36,9 @@ public class CacheLoadAspect extends AbstractCacheHandler {
         final Class<?> returnedClass = method.getReturnType();
         final Object[] params = jp.getArgs();
         final Loader<Object, Object> loader = param -> jp.proceed();
-        final Proceeder<Object> proceeder = () -> jp.proceed();
+        final Proceeder<Object> proceeder = jp::proceed;
 
-        return LoadOnCacheMiss(returnedClass, method, proceeder, params, loader);
+        return loadOnCacheMiss(returnedClass, method, proceeder, params, loader);
 
     }
 }

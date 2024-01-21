@@ -12,7 +12,7 @@ module fd.caches.ol.cdi {
     requires fd.caches.annotations;
 
     //for testing
-    exports org.fermented.dairy.caches.rest.entity.rto;
-    exports org.fermented.dairy.caches.rest.entity.rto.data;
-    exports org.fermented.dairy.caches.rest.entity.records;
+    exports org.fermented.dairy.caches.ol.cdi.rest.entity.rto;
+    exports org.fermented.dairy.caches.ol.cdi.rest.entity.rto.data;
+    exports org.fermented.dairy.caches.ol.cdi.rest.entity.records;
 }

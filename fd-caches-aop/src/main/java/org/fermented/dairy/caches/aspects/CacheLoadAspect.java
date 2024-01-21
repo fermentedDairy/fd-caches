@@ -38,7 +38,7 @@ public class CacheLoadAspect extends AbstractCacheHandler {
         final Loader<Object, Object> loader = param -> jp.proceed();
         final Proceeder<Object> proceeder = jp::proceed;
 
-        return loadOnCacheMiss(returnedClass, method, proceeder, params, loader);
+        return getFromCacheOrLoad(returnedClass, method, proceeder, params, loader);
 
     }
 }

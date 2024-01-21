@@ -58,7 +58,7 @@ public class CacheLoadInterceptor extends AbstractCacheHandler {
         final Loader<Object, Object> loader = param -> ctx.proceed();
         final Proceeder<Object> proceeder = ctx::proceed;
 
-        return loadOnCacheMiss(returnedClass, method, proceeder, params, loader);
+        return getFromCacheOrLoad(returnedClass, method, proceeder, params, loader);
     }
 
 }

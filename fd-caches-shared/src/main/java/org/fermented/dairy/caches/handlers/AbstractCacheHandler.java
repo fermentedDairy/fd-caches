@@ -64,7 +64,49 @@ public class AbstractCacheHandler {
         }
     }
 
-    protected static Class<?> getCachedClassForDelete(final Method method) throws CacheException {
+    protected Object getFromCacheOrLoad(final Class<?> returnedClass,
+                                        final Method method,
+                                        final Proceeder<Object> proceeder,
+                                        final Object[] params,
+                                        final Loader<Object, Object> loader) throws Throwable {
+        if (returnedClass.isAssignableFrom(void.class) || returnedClass.isAssignableFrom(Void.class)) {
+            throw new CacheException("void types cannot be cached");
+        }
+        if (isCacheDisabled(method)) {
+            return proceeder.proceed();
+        }
+        final Object cacheKey = getCacheKey(method, params);
+
+        if (returnedClass.isAssignableFrom(Optional.class)) {
+            final Class<?> returnOptionalClass = getActualReturnedClass(method);
+            return getCacheForLoad(method).loadOptional(cacheKey,
+                    param -> (Optional) loader.load(param),
+                    getCacheName(method),
+                    getTtl(method),
+                    cacheKey.getClass(),
+                    returnOptionalClass);
+        } else {
+            return getCacheForLoad(method).load(cacheKey,
+                    loader,
+                    getCacheName(method),
+                    getTtl(method),
+                    cacheKey.getClass(),
+                    returnedClass);
+        }
+    }
+
+    protected void deleteFromCache(final Method method, final Object[] params) throws CacheException {
+        final CacheProvider cacheProvider = getCacheForDelete(method);
+        final String cacheName = getCacheNameForDelete(method);
+        Object key = getCacheKey(method, params);
+        if (key.getClass().isAnnotationPresent(Cached.class)) {
+            key = getKeyFromCachedClass(key);
+        }
+
+        cacheProvider.removeValue(cacheName, key);
+    }
+
+    private static Class<?> getCachedClassForDelete(final Method method) throws CacheException {
 
         final CachedType cachedTypeAnnotation = method.getAnnotation(CachedType.class);
         if (cachedTypeAnnotation != null) {
@@ -74,7 +116,7 @@ public class AbstractCacheHandler {
         }
     }
 
-    protected static Class<?> cachedBeanFromArguments(final Method method) throws CacheException {
+    private static Class<?> cachedBeanFromArguments(final Method method) throws CacheException {
 
         return Arrays.stream(method.getParameters())
                 .map(Parameter::getType)
@@ -82,7 +124,7 @@ public class AbstractCacheHandler {
                 .findFirst().orElseThrow(() -> new CacheException("Could not determine cached class for method %s", method.getName()));
     }
 
-    protected CacheProvider getCacheForLoad(final Method method) {
+    private CacheProvider getCacheForLoad(final Method method) {
         final Class<?> returnType = getActualReturnedClass(method);
         final Optional<String> cacheProviderConfig = config.getOptionalValue(
                 CONFIG_TEMPLATE.formatted(returnType.getCanonicalName(), "cacheprovider"), String.class);
@@ -100,7 +142,7 @@ public class AbstractCacheHandler {
         return cacheNameMap.getOrDefault(cacheName, cacheNameMap.get(defaultProviderName));
     }
 
-    protected CacheProvider getCacheForDelete(final Method method) throws CacheException {
+    private CacheProvider getCacheForDelete(final Method method) throws CacheException {
         final Class<?> cacheClass = getCachedClassForDelete(method);
 
         final Optional<String> cacheProviderConfig = config.getOptionalValue(
@@ -119,7 +161,7 @@ public class AbstractCacheHandler {
         return cacheNameMap.getOrDefault(cacheName, cacheNameMap.get(defaultProviderName));
     }
 
-    protected Class<?> getActualReturnedClass(final Method method) {
+    private Class<?> getActualReturnedClass(final Method method) {
         if (method.getReturnType().isAssignableFrom(Optional.class)) {
             final CachedType cachedTypeAnnotation;
             if ((cachedTypeAnnotation = method.getAnnotation(CachedType.class)) == null) {
@@ -132,7 +174,7 @@ public class AbstractCacheHandler {
         }
     }
 
-    protected long getTtl(final Method method) {
+    private long getTtl(final Method method) {
 
         final Class<?> returnType = getActualReturnedClass(method);
         final Optional<Long> ttlConfig = config.getOptionalValue(
@@ -147,13 +189,13 @@ public class AbstractCacheHandler {
                 .orElse(defaultTtl);
     }
 
-    protected String getCacheName(final Method method) {
+    private String getCacheName(final Method method) {
 
         final Class<?> returnType = getActualReturnedClass(method);
         return getCacheNameFromConfig(method, returnType);
     }
 
-    protected String getCacheNameFromConfig(final Method method, final Class<?> cachedClass) {
+    private String getCacheNameFromConfig(final Method method, final Class<?> cachedClass) {
         final Optional<String> cacheNameConfig = config.getOptionalValue(
                 CONFIG_TEMPLATE.formatted(cachedClass.getCanonicalName(), "cachename"), String.class);
         if (cacheNameConfig.isPresent()) {
@@ -168,7 +210,7 @@ public class AbstractCacheHandler {
                 .orElse(cachedClass.getCanonicalName());
     }
 
-    protected Object getCacheKey(final Method method, final Object[] params) throws CacheException {
+    private Object getCacheKey(final Method method, final Object[] params) throws CacheException {
 
         if (params == null || params.length == 0) {
             throw new CacheException(
@@ -193,13 +235,13 @@ public class AbstractCacheHandler {
                 method.getName());
     }
 
-    protected boolean isCacheDisabled(final Method method) {
+    private boolean isCacheDisabled(final Method method) {
         return config.getOptionalValue(CONFIG_TEMPLATE.formatted(
                 getActualReturnedClass(method).getCanonicalName(),
                 "disabled"), Boolean.class).orElse(false);
     }
 
-    protected String getCacheNameForDelete(final Method method) throws CacheException {
+    private String getCacheNameForDelete(final Method method) throws CacheException {
         final Class<?> cachedClass = getCachedClassForDelete(method);
         return getCacheNameFromConfig(method, cachedClass);
     }
@@ -222,7 +264,7 @@ public class AbstractCacheHandler {
         return optionalCachedAnnotation;
     }
 
-    protected Object getKeyFromCachedClass(final Object key) throws CacheException {
+    private Object getKeyFromCachedClass(final Object key) throws CacheException {
         final Class<?> keyClass = key.getClass();
         final Field annotatedField = Arrays.stream(keyClass.getDeclaredFields())
                 .filter(field -> field.isAnnotationPresent(CacheKey.class))
@@ -257,52 +299,11 @@ public class AbstractCacheHandler {
      *
      * @return map of cache names to {@link CacheProvider CacheProviders}.
      */
-    protected static Map<String, CacheProvider> initCacheNameMap(final Iterable<CacheProvider> providers) {
+    private static Map<String, CacheProvider> initCacheNameMap(final Iterable<CacheProvider> providers) {
         return  StreamSupport.stream(providers.spliterator(), false).collect(Collectors.toMap(
                 CacheProvider::getProviderName,
                 Function.identity()
         ));
     }
 
-    protected void deleteFromCache(final Method method, final Object[] params) throws CacheException {
-        final CacheProvider cacheProvider = getCacheForDelete(method);
-        final String cacheName = getCacheNameForDelete(method);
-        Object key = getCacheKey(method, params);
-        if (key.getClass().isAnnotationPresent(Cached.class)) {
-            key = getKeyFromCachedClass(key);
-        }
-
-        cacheProvider.removeValue(cacheName, key);
-    }
-
-    protected Object getFromCacheOrLoad(final Class<?> returnedClass,
-                                        final Method method,
-                                        final Proceeder<Object> proceeder,
-                                        final Object[] params,
-                                        final Loader<Object, Object> loader) throws Throwable {
-        if (returnedClass.isAssignableFrom(void.class) || returnedClass.isAssignableFrom(Void.class)) {
-            throw new CacheException("void types cannot be cached");
-        }
-        if (isCacheDisabled(method)) {
-            return proceeder.proceed();
-        }
-        final Object cacheKey = getCacheKey(method, params);
-
-        if (returnedClass.isAssignableFrom(Optional.class)) {
-            final Class<?> returnOptionalClass = getActualReturnedClass(method);
-            return getCacheForLoad(method).loadOptional(cacheKey,
-                    param -> (Optional) loader.load(param),
-                    getCacheName(method),
-                    getTtl(method),
-                    cacheKey.getClass(),
-                    returnOptionalClass);
-        } else {
-            return getCacheForLoad(method).load(cacheKey,
-                    loader,
-                    getCacheName(method),
-                    getTtl(method),
-                    cacheKey.getClass(),
-                    returnedClass);
-        }
-    }
 }

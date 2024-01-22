@@ -19,7 +19,8 @@
     </properties>
 
     <modules>
-        <module>fd-caches-ol-cdi</module>
+        <module>fd-caches-ol-cdi</module> <!-- OpenLiberty CDI/Microprofile sample -->
+        <module>fd-caches-sb-aop</module> <!-- Spring Boot AspectJ sample -->
     </modules>
 
 </project>

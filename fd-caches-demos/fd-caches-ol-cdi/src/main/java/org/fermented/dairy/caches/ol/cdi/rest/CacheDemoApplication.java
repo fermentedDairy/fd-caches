@@ -1,6 +1,6 @@
 package org.fermented.dairy.caches.ol.cdi.rest;
 
-import static org.fermented.dairy.caches.ol.cdi.rest.Urls.APP_ROOT;
+import static org.fermented.dairy.caches.ol.cdi.rest.utils.Urls.APP_ROOT;
 
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;

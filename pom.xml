@@ -26,6 +26,7 @@
         <module>fd-caches-aop</module>
         <module>fd-caches-test</module>
         <module>fd-caches-shared</module>
+        <module>fd-caches-test/fd-caches-integration-test-utils</module>
     </modules>
 
     <build>

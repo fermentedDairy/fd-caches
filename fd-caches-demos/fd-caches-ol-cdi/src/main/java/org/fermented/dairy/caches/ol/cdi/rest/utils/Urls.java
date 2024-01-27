@@ -1,4 +1,4 @@
-package org.fermented.dairy.caches.ol.cdi.rest;
+package org.fermented.dairy.caches.ol.cdi.rest.utils;
 
 /**
  * URL utilities.

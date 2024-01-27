@@ -1,12 +1,5 @@
 package org.fermented.dairy.caches.ol.cdi.it;
 
-import com.consol.citrus.annotations.CitrusResource;
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.context.TestContext;
-import com.consol.citrus.dsl.endpoint.CitrusEndpoints;
-import com.consol.citrus.http.client.HttpClient;
-import com.consol.citrus.junit.jupiter.CitrusSupport;
-import com.consol.citrus.testng.TestNGCitrusSupport;
 import org.fermented.dairy.caches.ol.cdi.rest.entity.records.ConfigOverriddenCacheRecord;
 import org.fermented.dairy.caches.ol.cdi.rest.entity.records.DefaultCacheRecord;
 import org.fermented.dairy.caches.ol.cdi.rest.entity.records.DisabledCacheRecord;
@@ -25,15 +18,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.fermented.dairy.caches.ol.cdi.it.utils.RestUtils.validateDelete;
-import static org.fermented.dairy.caches.ol.cdi.it.utils.RestUtils.validateGet;
-import static org.fermented.dairy.caches.ol.cdi.it.utils.RestUtils.validateGetList;
-import static org.fermented.dairy.caches.ol.cdi.it.utils.RestUtils.validatePut;
-import static org.junit.Assert.fail;
+import static org.fermented.dairy.caches.it.RestUtils.validateDelete;
+import static org.fermented.dairy.caches.it.RestUtils.validateGet;
+import static org.fermented.dairy.caches.it.RestUtils.validateGetList;
+import static org.fermented.dairy.caches.it.RestUtils.validatePut;
+
 
 @MicroShedTest
-@CitrusSupport
-public class CachesIT extends TestNGCitrusSupport {
+public class CachesIT {
 
     @Container
     public static ApplicationContainer app = new ApplicationContainer()
@@ -42,36 +34,33 @@ public class CachesIT extends TestNGCitrusSupport {
 
     private String applicationUrl;
 
-    private HttpClient client;
-
     @BeforeEach
-    void beforeEach(@CitrusResource final TestContext context) {
+    void beforeEach() {
         applicationUrl = app.getApplicationURL();
-        client = CitrusEndpoints.http()
-                .client()
-                .requestUrl(applicationUrl)
-                .build();
 
-        validateDelete(client, context, "api/caches/providers", "{}", Map.of(
+        validateDelete(applicationUrl, "{}", Map.of(
                 "internal.default.cache", "Purged",
                 "configuredCache", "Purged",
-                "namedCache",  "Purged"));
+                "namedCache",  "Purged"),
+                Map.class,
+                "api", "caches", "providers");
     }
 
     @Test
-    @CitrusTest
     @DisplayName("GET all provider names")
-    void getAllProviderNames(@CitrusResource final TestContext context) {
-        validateGetList(client, context, "api/caches/providers", List.of("internal.default.cache", "configuredCache", "namedCache"));
+    void getAllProviderNames() {
+        validateGetList(applicationUrl,
+                List.of("internal.default.cache", "configuredCache", "namedCache"),
+                String.class,
+                "api", "caches", "providers");
     }
 
 
     @Test
-    @CitrusTest
     @DisplayName("PUT record and fetch from default cache, validate fetched object and verify presence in cache")
-    void putRecordAndFetchFromDefaultCache(@CitrusResource final TestContext context) {
+    void putRecordAndFetchFromDefaultCache() {
         final UUID id = UUID.randomUUID();
-        validatePut(client, context, "api/data/default",
+        validatePut(applicationUrl,
                 DefaultCacheRecord.builder().id(id).value("PutTest").build(),
                 PutRecordResponse.builder().id(id).links(
                         Set.of(
@@ -81,39 +70,42 @@ public class CachesIT extends TestNGCitrusSupport {
                                         .type("GET")
                                         .build()
                         )
-                ).build()
+                ).build(),
+                PutRecordResponse.class,
+                "api", "data", "default"
         );
 
-        validateGet(client, context, "api/data/default/%s".formatted(id.toString()),
-                DefaultCacheRecord.builder().id(id).value("PutTest").build()
+        validateGet(applicationUrl,
+                DefaultCacheRecord.builder().id(id).value("PutTest").build(),
+                DefaultCacheRecord.class,
+                "api", "data", "default", id.toString()
         );
 
-        validateGetList(client, context, "api/caches/providers/internal.default.cache",
-                List.of(DefaultCacheRecord.class.getCanonicalName())
+        validateGetList(applicationUrl,
+                List.of(DefaultCacheRecord.class.getCanonicalName()),
+                String.class,
+                "api", "caches", "providers", "internal.default.cache"
         );
 
-        validateGetList(client, context,
-                "api/caches/providers/internal.default.cache/caches/%s/keys"
-                        .formatted(DefaultCacheRecord.class.getCanonicalName()),
-                List.of(id)
+        validateGetList(applicationUrl,
+                List.of(id),
+                UUID.class,
+                "api", "caches", "providers", "internal.default.cache", "caches", DefaultCacheRecord.class.getCanonicalName(), "keys"
         );
 
-        validateGet(client, context,
-                "api/caches/providers/internal.default.cache/caches/%s/keys/%s"
-                        .formatted(
-                                DefaultCacheRecord.class.getCanonicalName(),
-                                id),
-                DefaultCacheRecord.builder().id(id).value("PutTest").build()
+        validateGet(applicationUrl,
+                DefaultCacheRecord.builder().id(id).value("PutTest").build(),
+                DefaultCacheRecord.class,
+                "api", "caches", "providers", "internal.default.cache", "caches", DefaultCacheRecord.class.getCanonicalName(), "keys", id.toString()
         );
 
     }
 
     @Test
-    @CitrusTest
     @DisplayName("PUT record and fetch from default cache, validate fetched object and verify presence in cache then delete and verify")
-    void putRecordFetchDeleteFromDefaultCache(@CitrusResource final TestContext context) {
+    void putRecordFetchDeleteFromDefaultCache() {
         final UUID id = UUID.randomUUID();
-        validatePut(client, context, "api/data/default",
+        validatePut(applicationUrl,
                 DefaultCacheRecord.builder().id(id).value("PutTest").build(),
                 PutRecordResponse.builder().id(id).links(
                         Set.of(
@@ -123,32 +115,36 @@ public class CachesIT extends TestNGCitrusSupport {
                                         .type("GET")
                                         .build()
                         )
-                ).build()
+                ).build(),
+                PutRecordResponse.class,
+                "api", "data", "default"
         );
 
-        validateGet(client, context, "api/data/default/%s".formatted(id.toString()),
-                DefaultCacheRecord.builder().id(id).value("PutTest").build()
+        validateGet(applicationUrl,
+                DefaultCacheRecord.builder().id(id).value("PutTest").build(),
+                DefaultCacheRecord.class,
+                "api", "data", "default", id.toString()
         );
 
-        validateGetList(client, context, "api/caches/providers/internal.default.cache",
-                List.of(DefaultCacheRecord.class.getCanonicalName())
+        validateGetList(applicationUrl,
+                List.of(DefaultCacheRecord.class.getCanonicalName()),
+                String.class,
+                "api", "caches", "providers", "internal.default.cache"
         );
 
-        validateGetList(client, context,
-                "api/caches/providers/internal.default.cache/caches/%s/keys"
-                        .formatted(DefaultCacheRecord.class.getCanonicalName()),
-                List.of(id)
+        validateGetList(applicationUrl,
+                List.of(id),
+                UUID.class,
+                "api", "caches", "providers", "internal.default.cache", "caches", DefaultCacheRecord.class.getCanonicalName(), "keys"
         );
 
-        validateGet(client, context,
-                "api/caches/providers/internal.default.cache/caches/%s/keys/%s"
-                        .formatted(
-                                DefaultCacheRecord.class.getCanonicalName(),
-                                id),
-                DefaultCacheRecord.builder().id(id).value("PutTest").build()
+        validateGet(applicationUrl,
+                DefaultCacheRecord.builder().id(id).value("PutTest").build(),
+                DefaultCacheRecord.class,
+                "api", "caches", "providers", "internal.default.cache", "caches", DefaultCacheRecord.class.getCanonicalName(), "keys", id.toString()
         );
 
-        validatePut(client, context, "api/data/default",
+        validatePut(applicationUrl,
                 DefaultCacheRecord.builder().id(id).value("PutTest2").build(),
                 PutRecordResponse.builder().id(id).links(
                         Set.of(
@@ -158,23 +154,24 @@ public class CachesIT extends TestNGCitrusSupport {
                                         .type("GET")
                                         .build()
                         )
-                ).build()
+                ).build(),
+                PutRecordResponse.class,
+                "api", "data", "default"
         );
 
-        validateGetList(client, context,
-                "api/caches/providers/internal.default.cache/caches/%s/keys"
-                        .formatted(DefaultCacheRecord.class.getCanonicalName()),
-                List.of()
+        validateGetList(applicationUrl,
+                List.of(),
+                String.class,
+                "api", "caches", "providers", "internal.default.cache", "caches", DefaultCacheRecord.class.getCanonicalName(), "keys"
         );
 
     }
 
     @Test
-    @CitrusTest
     @DisplayName("PUT record and fetch from named cache, validate fetched object and verify presence in cache")
-    void putRecordAndFetchFromNamedCache(@CitrusResource final TestContext context) {
+    void putRecordAndFetchFromNamedCache() {
         final UUID id = UUID.randomUUID();
-        validatePut(client, context, "api/data/named",
+        validatePut(applicationUrl,
                 NamedCacheRecord.builder().id(id).value("PutTest").build(),
                 PutRecordResponse.builder().id(id).links(
                         Set.of(
@@ -184,39 +181,42 @@ public class CachesIT extends TestNGCitrusSupport {
                                         .type("GET")
                                         .build()
                         )
-                ).build()
+                ).build(),
+                PutRecordResponse.class,
+                "api", "data", "named"
         );
 
-        validateGet(client, context, "api/data/named/%s".formatted(id.toString()),
-                NamedCacheRecord.builder().id(id).value("PutTest").build()
+        validateGet(applicationUrl,
+                NamedCacheRecord.builder().id(id).value("PutTest").build(),
+                NamedCacheRecord.class,
+                "api", "data", "named", id.toString()
         );
 
-        validateGetList(client, context, "api/caches/providers/namedCache",
-                List.of("namedCacheRecords")
+        validateGetList(applicationUrl,
+                List.of("namedCacheRecords"),
+                String.class,
+                "api", "caches", "providers", "namedCache"
         );
 
-        validateGetList(client, context,
-                "api/caches/providers/namedCache/caches/%s/keys"
-                        .formatted("namedCacheRecords"),
-                List.of(id)
+        validateGetList(applicationUrl,
+                List.of(id),
+                UUID.class,
+                "api", "caches", "providers", "namedCache", "caches", "namedCacheRecords", "keys"
         );
 
-        validateGet(client, context,
-                "api/caches/providers/namedCache/caches/%s/keys/%s"
-                        .formatted(
-                                "namedCacheRecords",
-                                id),
-                DefaultCacheRecord.builder().id(id).value("PutTest").build()
+        validateGet(applicationUrl,
+                NamedCacheRecord.builder().id(id).value("PutTest").build(),
+                NamedCacheRecord.class,
+                "api", "caches", "providers", "namedCache", "caches", "namedCacheRecords", "keys", id.toString()
         );
 
     }
 
     @Test
-    @CitrusTest
     @DisplayName("PUT record and fetch from named cache, validate fetched object and verify presence in cache then delete and verify")
-    void putRecordFetchDeleteFromNamedCache(@CitrusResource final TestContext context) {
+    void putRecordFetchDeleteFromNamedCache() {
         final UUID id = UUID.randomUUID();
-        validatePut(client, context, "api/data/named",
+        validatePut(applicationUrl,
                 NamedCacheRecord.builder().id(id).value("PutTest").build(),
                 PutRecordResponse.builder().id(id).links(
                         Set.of(
@@ -226,32 +226,38 @@ public class CachesIT extends TestNGCitrusSupport {
                                         .type("GET")
                                         .build()
                         )
-                ).build()
+                ).build(),
+                PutRecordResponse.class,
+                "api", "data", "named"
         );
 
-        validateGet(client, context, "api/data/named/%s".formatted(id.toString()),
-                NamedCacheRecord.builder().id(id).value("PutTest").build()
+        validateGet(applicationUrl,
+                NamedCacheRecord.builder().id(id).value("PutTest").build(),
+                NamedCacheRecord.class,
+                "api", "data", "named", id.toString()
         );
 
-        validateGetList(client, context, "api/caches/providers/namedCache",
-                List.of("namedCacheRecords")
+
+
+        validateGetList(applicationUrl,
+                List.of("namedCacheRecords"),
+                String.class,
+                "api", "caches", "providers", "namedCache"
         );
 
-        validateGetList(client, context,
-                "api/caches/providers/namedCache/caches/%s/keys"
-                        .formatted("namedCacheRecords"),
-                List.of(id)
+        validateGetList(applicationUrl,
+                List.of(id),
+                UUID.class,
+                "api", "caches", "providers", "namedCache", "caches", "namedCacheRecords", "keys"
         );
 
-        validateGet(client, context,
-                "api/caches/providers/namedCache/caches/%s/keys/%s"
-                        .formatted(
-                                "namedCacheRecords",
-                                id),
-                DefaultCacheRecord.builder().id(id).value("PutTest").build()
+        validateGet(applicationUrl,
+                NamedCacheRecord.builder().id(id).value("PutTest").build(),
+                NamedCacheRecord.class,
+                "api", "caches", "providers", "namedCache", "caches", "namedCacheRecords", "keys", id.toString()
         );
 
-        validatePut(client, context, "api/data/named",
+        validatePut(applicationUrl,
                 NamedCacheRecord.builder().id(id).value("PutTest2").build(),
                 PutRecordResponse.builder().id(id).links(
                         Set.of(
@@ -261,23 +267,24 @@ public class CachesIT extends TestNGCitrusSupport {
                                         .type("GET")
                                         .build()
                         )
-                ).build()
+                ).build(),
+                PutRecordResponse.class,
+                "api", "data", "named"
         );
 
-        validateGetList(client, context,
-                "api/caches/providers/namedCache/caches/%s/keys"
-                        .formatted("namedCacheRecords"),
-                List.of()
+        validateGetList(applicationUrl,
+                List.of(),
+                String.class,
+                "api", "caches", "providers", "namedCache", "caches", "namedCacheRecords", "keys"
         );
 
     }
 
     @Test
-    @CitrusTest
     @DisplayName("PUT record and fetch from configured cache, validate fetched object and verify presence in cache")
-    void putRecordAndFetchFromOverriddenCache(@CitrusResource final TestContext context) {
+    void putRecordAndFetchFromOverriddenCache() {
         final UUID id = UUID.randomUUID();
-        validatePut(client, context, "api/data/overridden",
+        validatePut(applicationUrl,
                 ConfigOverriddenCacheRecord.builder().id(id).value("PutTest").build(),
                 PutRecordResponse.builder().id(id).links(
                         Set.of(
@@ -287,39 +294,42 @@ public class CachesIT extends TestNGCitrusSupport {
                                         .type("GET")
                                         .build()
                         )
-                ).build()
+                ).build(),
+                PutRecordResponse.class,
+                "api", "data", "overridden"
         );
 
-        validateGet(client, context, "api/data/overridden/%s".formatted(id.toString()),
-                ConfigOverriddenCacheRecord.builder().id(id).value("PutTest").build()
+        validateGet(applicationUrl,
+                ConfigOverriddenCacheRecord.builder().id(id).value("PutTest").build(),
+                ConfigOverriddenCacheRecord.class,
+                "api", "data", "overridden", id.toString()
         );
 
-        validateGetList(client, context, "api/caches/providers/configuredCache",
-                List.of("configuredCacheRec")
+        validateGetList(applicationUrl,
+                List.of("configuredCacheRec"),
+                String.class,
+                "api", "caches", "providers", "configuredCache"
         );
 
-        validateGetList(client, context,
-                "api/caches/providers/configuredCache/caches/%s/keys"
-                        .formatted("configuredCacheRec"),
-                List.of(id)
+        validateGetList(applicationUrl,
+                List.of(id),
+                UUID.class,
+                "api", "caches", "providers", "configuredCache", "caches", "configuredCacheRec", "keys"
         );
 
-        validateGet(client, context,
-                "api/caches/providers/configuredCache/caches/%s/keys/%s"
-                        .formatted(
-                                "configuredCacheRec",
-                                id),
-                ConfigOverriddenCacheRecord.builder().id(id).value("PutTest").build()
+        validateGet(applicationUrl,
+                ConfigOverriddenCacheRecord.builder().id(id).value("PutTest").build(),
+                ConfigOverriddenCacheRecord.class,
+                "api", "caches", "providers", "configuredCache", "caches", "configuredCacheRec", "keys", id.toString()
         );
 
     }
 
     @Test
-    @CitrusTest
     @DisplayName("PUT record and fetch from named cache, validate fetched object and verify presence in cache then delete and verify")
-    void putRecordFetchDeleteFromConfiguredCache(@CitrusResource final TestContext context) {
+    void putRecordFetchDeleteFromConfiguredCache() {
         final UUID id = UUID.randomUUID();
-        validatePut(client, context, "api/data/overridden",
+        validatePut(applicationUrl,
                 ConfigOverriddenCacheRecord.builder().id(id).value("PutTest").build(),
                 PutRecordResponse.builder().id(id).links(
                         Set.of(
@@ -329,32 +339,36 @@ public class CachesIT extends TestNGCitrusSupport {
                                         .type("GET")
                                         .build()
                         )
-                ).build()
+                ).build(),
+                PutRecordResponse.class,
+                "api", "data", "overridden"
         );
 
-        validateGet(client, context, "api/data/overridden/%s".formatted(id.toString()),
-                ConfigOverriddenCacheRecord.builder().id(id).value("PutTest").build()
+        validateGet(applicationUrl,
+                ConfigOverriddenCacheRecord.builder().id(id).value("PutTest").build(),
+                ConfigOverriddenCacheRecord.class,
+                "api", "data", "overridden", id.toString()
         );
 
-        validateGetList(client, context, "api/caches/providers/configuredCache",
-                List.of("configuredCacheRec")
+        validateGetList(applicationUrl,
+                List.of("configuredCacheRec"),
+                String.class,
+                "api", "caches", "providers", "configuredCache"
         );
 
-        validateGetList(client, context,
-                "api/caches/providers/configuredCache/caches/%s/keys"
-                        .formatted("configuredCacheRec"),
-                List.of(id)
+        validateGetList(applicationUrl,
+                List.of(id),
+                UUID.class,
+                "api", "caches", "providers", "configuredCache", "caches", "configuredCacheRec", "keys"
         );
 
-        validateGet(client, context,
-                "api/caches/providers/configuredCache/caches/%s/keys/%s"
-                        .formatted(
-                                "configuredCacheRec",
-                                id),
-                ConfigOverriddenCacheRecord.builder().id(id).value("PutTest").build()
+        validateGet(applicationUrl,
+                ConfigOverriddenCacheRecord.builder().id(id).value("PutTest").build(),
+                ConfigOverriddenCacheRecord.class,
+                "api", "caches", "providers", "configuredCache", "caches", "configuredCacheRec", "keys", id.toString()
         );
 
-        validatePut(client, context, "api/data/overridden",
+        validatePut(applicationUrl,
                 ConfigOverriddenCacheRecord.builder().id(id).value("PutTest2").build(),
                 PutRecordResponse.builder().id(id).links(
                         Set.of(
@@ -364,23 +378,24 @@ public class CachesIT extends TestNGCitrusSupport {
                                         .type("GET")
                                         .build()
                         )
-                ).build()
+                ).build(),
+                PutRecordResponse.class,
+                "api", "data", "overridden"
         );
 
-        validateGetList(client, context,
-                "api/caches/providers/configuredCache/caches/%s/keys"
-                        .formatted("configuredCacheRec"),
-                List.of()
+        validateGetList(applicationUrl,
+                List.of(),
+                String.class,
+                "api", "caches", "providers", "configuredCache", "caches", "configuredCacheRec", "keys"
         );
 
     }
 
     @Test
-    @CitrusTest
     @DisplayName("PUT record and fetch record, cache disabled in config")
-    void putRecordAndFetchCacheDisabled(@CitrusResource final TestContext context) {
+    void putRecordAndFetchCacheDisabled() {
         final UUID id = UUID.randomUUID();
-        validatePut(client, context, "api/data/disabled",
+        validatePut(applicationUrl,
                 DisabledCacheRecord.builder().id(id).value("PutTest").build(),
                 PutRecordResponse.builder().id(id).links(
                         Set.of(
@@ -390,23 +405,33 @@ public class CachesIT extends TestNGCitrusSupport {
                                         .type("GET")
                                         .build()
                         )
-                ).build()
+                ).build(),
+                PutRecordResponse.class,
+                "api", "data", "disabled"
         );
 
-        validateGet(client, context, "api/data/disabled/%s".formatted(id.toString()),
-                DisabledCacheRecord.builder().id(id).value("PutTest").build()
+        validateGet(applicationUrl,
+                DisabledCacheRecord.builder().id(id).value("PutTest").build(),
+                DisabledCacheRecord.class,
+                "api", "data", "disabled", id.toString()
         );
 
-        validateGetList(client, context, "api/caches/providers/configuredCache",
-                List.of()
+        validateGetList(applicationUrl,
+                List.of(),
+                String.class,
+                "api", "caches", "providers", "configuredCache"
         );
 
-        validateGetList(client, context, "api/caches/providers/namedCache",
-                List.of()
+        validateGetList(applicationUrl,
+                List.of(),
+                String.class,
+                "api", "caches", "providers", "namedCache"
         );
 
-        validateGetList(client, context, "api/caches/providers/internal.default.cache",
-                List.of()
+        validateGetList(applicationUrl,
+                List.of(),
+                String.class,
+                "api", "caches", "providers", "internal.default.cache"
         );
 
     }

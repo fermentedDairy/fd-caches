@@ -29,7 +29,7 @@ import org.fermented.dairy.caches.ol.cdi.rest.entity.records.NamedCacheRecord;
 import org.fermented.dairy.caches.ol.cdi.rest.entity.rto.Link;
 import org.fermented.dairy.caches.ol.cdi.rest.entity.rto.data.PutRecordResponse;
 
-import static org.fermented.dairy.caches.ol.cdi.rest.Urls.*;
+import static org.fermented.dairy.caches.ol.cdi.rest.utils.Urls.*;
 
 /**
  * REST Boundary for data operations.

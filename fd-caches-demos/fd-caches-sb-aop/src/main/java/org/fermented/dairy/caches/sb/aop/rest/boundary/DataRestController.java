@@ -8,7 +8,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.text.StringSubstitutor;
-import org.fermented.dairy.caches.sb.aop.rest.controller.aspect.Logged;
 import org.fermented.dairy.caches.sb.aop.rest.controller.service.DataService;
 import org.fermented.dairy.caches.sb.aop.rest.entity.records.ConfigOverriddenCacheRecord;
 import org.fermented.dairy.caches.sb.aop.rest.entity.records.DefaultCacheRecord;
@@ -53,7 +52,6 @@ public class DataRestController {
     @Operation(
             summary = "Gets a set of keys for a given cache and provider")
     @Schema(contentSchema = PutRecordResponse.class)
-    @Logged
     public PutRecordResponse addDefault(@NotNull @RequestBody final DefaultCacheRecord cacheRecord) {
         dataService.addDefaultCacheRecord(cacheRecord);
         return PutRecordResponse.builder()

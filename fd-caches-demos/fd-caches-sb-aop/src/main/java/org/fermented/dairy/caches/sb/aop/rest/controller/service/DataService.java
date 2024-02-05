@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.fermented.dairy.caches.annotations.CacheDelete;
 import org.fermented.dairy.caches.annotations.CacheLoad;
 import org.fermented.dairy.caches.annotations.CachedType;
-import org.fermented.dairy.caches.sb.aop.rest.controller.aspect.Logged;
 import org.fermented.dairy.caches.sb.aop.rest.entity.records.ConfigOverriddenCacheRecord;
 import org.fermented.dairy.caches.sb.aop.rest.entity.records.DefaultCacheRecord;
 import org.fermented.dairy.caches.sb.aop.rest.entity.records.DisabledCacheRecord;
@@ -35,7 +34,6 @@ public class DataService {
      */
     @CacheDelete
     @CachedType(DefaultCacheRecord.class)
-    @Logged
     public void addDefaultCacheRecord(final DefaultCacheRecord dataRecord) {
         DEFAULT_RECORDS.put(dataRecord.id(), dataRecord);
     }
@@ -48,7 +46,6 @@ public class DataService {
      */
     @CacheLoad
     @CachedType(DefaultCacheRecord.class)
-    @Logged
     public Optional<DefaultCacheRecord> getDefault(final UUID id) {
         return Optional.ofNullable(DEFAULT_RECORDS.get(id));
     }

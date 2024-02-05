@@ -13,6 +13,7 @@ module fd.caches.sb.aop {
     requires java.logging;
     requires fd.caches.aop;
     requires fd.caches.providers;
+    requires org.aspectj.weaver;
     exports org.fermented.dairy.caches.sb.aop.rest.entity.records;
     exports org.fermented.dairy.caches.sb.aop.rest.entity.rto.data;
 }

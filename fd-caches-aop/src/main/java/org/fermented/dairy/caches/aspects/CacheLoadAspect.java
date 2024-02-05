@@ -12,8 +12,10 @@ import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 import org.fermented.dairy.caches.handlers.AbstractCacheHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 
 @Aspect
+@Component
 public class CacheLoadAspect extends AbstractCacheHandler {
 
     /**

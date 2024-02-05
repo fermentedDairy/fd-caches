@@ -2,7 +2,6 @@ package org.fermented.dairy.caches.sb.aop.rest.entity.rto.data;
 
 import lombok.Builder;
 import lombok.Singular;
-import org.fermented.dairy.caches.sb.aop.rest.entity.rto.Link;
 
 import java.util.Collections;
 import java.util.Set;

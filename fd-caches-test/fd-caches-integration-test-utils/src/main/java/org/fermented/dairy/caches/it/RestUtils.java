@@ -27,7 +27,7 @@ public class RestUtils {
                 .build();
         Response response = client.newCall(request).execute();
 
-        assertTrue(response.isSuccessful(), "Successful response expected");
+        assertTrue(response.isSuccessful(), "Successful response expected from %s".formatted(callUrl));
 
         List<T> result = mapper.readerForListOf(expectedType).readValue(response.body().string());
         assertEquals(expectedResult, result, "result is not expected");
@@ -45,7 +45,7 @@ public class RestUtils {
                 .build();
         Response response = client.newCall(request).execute();
 
-        assertTrue(response.isSuccessful(), "Successful response expected");
+        assertTrue(response.isSuccessful(), "Successful response expected from %s".formatted(callUrl));
 
         T result = mapper.readValue(response.body().string(), expectedType);
         assertEquals(expectedResult, result, "result is not expected");
@@ -78,7 +78,8 @@ public class RestUtils {
     public static <R, T> void validatePut(final String applicationUrl, final R body, final T expectedResult, Class<T> expectedType, final String... pathParts) {
         String callUrl = applicationUrl + "/" + String.join("/", pathParts);
         MediaType mediaType = MediaType.parse("application/json");
-        RequestBody requestBody = RequestBody.create(mapper.writeValueAsString(body), mediaType);
+        String payload = mapper.writeValueAsString(body);
+        RequestBody requestBody = RequestBody.create(payload, mediaType);
         Request request = new Request.Builder()
                 .url(callUrl)
                 .method("PUT", requestBody)
@@ -87,7 +88,10 @@ public class RestUtils {
         Response response = client.newCall(request).execute();
 
 
-        assertTrue(response.isSuccessful(), "Successful response expected");
+        assertTrue(response.isSuccessful(), "Successful response expected from %s, code: %s, payload: %s".formatted(
+                callUrl,
+                response.code(),
+                payload));
 
         T result = mapper.readValue(response.body().string(), expectedType);
         assertEquals(expectedResult, result, "result is not expected");

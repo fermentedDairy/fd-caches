@@ -1,4 +1,4 @@
-package org.fermented.dairy.caches.sb.aop.rest.providers;
+package org.fermented.dairy.caches.sb.aop.rest.controller.providers;
 
 import org.fermented.dairy.caches.api.functions.Loader;
 import org.fermented.dairy.caches.api.functions.OptionalLoader;
@@ -13,11 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Cache provider for testing cache configuration.
- */
 @Component
-public class ConfiguredCacheProvider implements CacheProvider {
+public class NamedCacheProvider implements CacheProvider {
 
     private static final ConcurrentHashMap<KeyHolder, ValueHolder> CACHE_MAP = new ConcurrentHashMap<>();
 
@@ -118,20 +115,20 @@ public class ConfiguredCacheProvider implements CacheProvider {
     public Collection<String> getCacheNames() {
         return Stream.concat(CACHE_MAP.keySet().stream().map(KeyHolder::cacheName),
                 CACHE_NAMES.stream()
-        ).collect(Collectors.toSet());
+                ).collect(Collectors.toSet());
     }
 
     @Override
     public Collection<Object> getKeys(final String cacheName) {
         return CACHE_MAP.keySet().stream().filter(
-                        key -> key.cacheName().equals(cacheName)
-                ).map(KeyHolder::key)
+                key -> key.cacheName().equals(cacheName)
+        ).map(KeyHolder::key)
                 .collect(Collectors.toSet());
     }
 
     @Override
     public String getProviderName() {
-        return "configuredCache";
+        return "namedCache";
     }
 
     @Override

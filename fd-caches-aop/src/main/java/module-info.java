@@ -6,4 +6,5 @@ module fd.caches.aop {
     requires fd.caches.api;
     requires spring.context;
     requires fd.caches.annotations;
+    exports org.fermented.dairy.caches.aspects;
 }

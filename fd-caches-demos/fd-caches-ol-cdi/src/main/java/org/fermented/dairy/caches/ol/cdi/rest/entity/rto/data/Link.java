@@ -1,4 +1,4 @@
-package org.fermented.dairy.caches.ol.cdi.rest.entity.rto;
+package org.fermented.dairy.caches.ol.cdi.rest.entity.rto.data;
 
 import lombok.Builder;
 

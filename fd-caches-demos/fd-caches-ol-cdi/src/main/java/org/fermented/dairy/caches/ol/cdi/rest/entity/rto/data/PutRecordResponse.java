@@ -5,7 +5,6 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Singular;
-import org.fermented.dairy.caches.ol.cdi.rest.entity.rto.Link;
 
 /**
  * Response for putting record.

@@ -1,6 +1,10 @@
-package org.fermented.dairy.caches.ol.cdi.rest.providers;
+package org.fermented.dairy.caches.sb.aop.rest.controller.providers;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import org.fermented.dairy.caches.api.functions.Loader;
+import org.fermented.dairy.caches.api.functions.OptionalLoader;
+import org.fermented.dairy.caches.api.interfaces.CacheProvider;
+import org.springframework.stereotype.Component;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
@@ -8,12 +12,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.fermented.dairy.caches.api.functions.Loader;
-import org.fermented.dairy.caches.api.functions.OptionalLoader;
-import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 
-@ApplicationScoped
-public class NamedCacheProvider implements CacheProvider {
+/**
+ * Cache provider for testing cache configuration.
+ */
+@Component
+public class ConfiguredCacheProvider implements CacheProvider {
 
     private static final ConcurrentHashMap<KeyHolder, ValueHolder> CACHE_MAP = new ConcurrentHashMap<>();
 
@@ -114,20 +118,20 @@ public class NamedCacheProvider implements CacheProvider {
     public Collection<String> getCacheNames() {
         return Stream.concat(CACHE_MAP.keySet().stream().map(KeyHolder::cacheName),
                 CACHE_NAMES.stream()
-                ).collect(Collectors.toSet());
+        ).collect(Collectors.toSet());
     }
 
     @Override
     public Collection<Object> getKeys(final String cacheName) {
         return CACHE_MAP.keySet().stream().filter(
-                key -> key.cacheName().equals(cacheName)
-        ).map(KeyHolder::key)
+                        key -> key.cacheName().equals(cacheName)
+                ).map(KeyHolder::key)
                 .collect(Collectors.toSet());
     }
 
     @Override
     public String getProviderName() {
-        return "namedCache";
+        return "configuredCache";
     }
 
     @Override

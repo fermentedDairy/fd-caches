@@ -26,6 +26,7 @@
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
             <version>${aspectj.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.fermented.dairy.caches</groupId>

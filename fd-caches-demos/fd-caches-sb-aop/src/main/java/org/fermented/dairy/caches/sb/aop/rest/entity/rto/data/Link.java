@@ -1,4 +1,4 @@
-package org.fermented.dairy.caches.sb.aop.rest.entity.rto;
+package org.fermented.dairy.caches.sb.aop.rest.entity.rto.data;
 
 import lombok.Builder;
 

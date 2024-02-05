@@ -1,6 +1,5 @@
-package org.fermented.dairy.caches.ol.cdi.rest.controller;
+package org.fermented.dairy.caches.sb.aop.rest.controller.service;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -8,15 +7,17 @@ import java.util.UUID;
 import org.fermented.dairy.caches.annotations.CacheDelete;
 import org.fermented.dairy.caches.annotations.CacheLoad;
 import org.fermented.dairy.caches.annotations.CachedType;
-import org.fermented.dairy.caches.ol.cdi.rest.entity.records.ConfigOverriddenCacheRecord;
-import org.fermented.dairy.caches.ol.cdi.rest.entity.records.DefaultCacheRecord;
-import org.fermented.dairy.caches.ol.cdi.rest.entity.records.DisabledCacheRecord;
-import org.fermented.dairy.caches.ol.cdi.rest.entity.records.NamedCacheRecord;
+import org.fermented.dairy.caches.sb.aop.rest.controller.aspect.Logged;
+import org.fermented.dairy.caches.sb.aop.rest.entity.records.ConfigOverriddenCacheRecord;
+import org.fermented.dairy.caches.sb.aop.rest.entity.records.DefaultCacheRecord;
+import org.fermented.dairy.caches.sb.aop.rest.entity.records.DisabledCacheRecord;
+import org.fermented.dairy.caches.sb.aop.rest.entity.records.NamedCacheRecord;
+import org.springframework.stereotype.Service;
 
 /**
  * Application Scoped class providing the intercepted caching methods.
  */
-@ApplicationScoped
+@Service
 public class DataService {
 
     private static final Map<UUID, DefaultCacheRecord> DEFAULT_RECORDS = new HashMap<>();
@@ -34,6 +35,7 @@ public class DataService {
      */
     @CacheDelete
     @CachedType(DefaultCacheRecord.class)
+    @Logged
     public void addDefaultCacheRecord(final DefaultCacheRecord dataRecord) {
         DEFAULT_RECORDS.put(dataRecord.id(), dataRecord);
     }
@@ -46,6 +48,7 @@ public class DataService {
      */
     @CacheLoad
     @CachedType(DefaultCacheRecord.class)
+    @Logged
     public Optional<DefaultCacheRecord> getDefault(final UUID id) {
         return Optional.ofNullable(DEFAULT_RECORDS.get(id));
     }
@@ -119,3 +122,4 @@ public class DataService {
         return Optional.ofNullable(DISABLED_RECORDS.get(id));
     }
 }
+

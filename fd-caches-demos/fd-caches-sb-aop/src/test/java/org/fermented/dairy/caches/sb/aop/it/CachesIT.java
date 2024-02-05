@@ -4,7 +4,7 @@ import org.fermented.dairy.caches.sb.aop.rest.entity.records.ConfigOverriddenCac
 import org.fermented.dairy.caches.sb.aop.rest.entity.records.DefaultCacheRecord;
 import org.fermented.dairy.caches.sb.aop.rest.entity.records.DisabledCacheRecord;
 import org.fermented.dairy.caches.sb.aop.rest.entity.records.NamedCacheRecord;
-import org.fermented.dairy.caches.sb.aop.rest.entity.rto.Link;
+import org.fermented.dairy.caches.sb.aop.rest.entity.rto.data.Link;
 import org.fermented.dairy.caches.sb.aop.rest.entity.rto.data.PutRecordResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -66,7 +66,7 @@ public class CachesIT {
                         Set.of(
                                 Link.builder()
                                         .rel("default")
-                                        .href("fd-caches-ol-cdi/api/data/default/%s".formatted(id.toString()))
+                                        .href("fd-caches-sb-aop/api/data/default/%s".formatted(id.toString()))
                                         .type("GET")
                                         .build()
                         )
@@ -111,7 +111,7 @@ public class CachesIT {
                         Set.of(
                                 Link.builder()
                                         .rel("default")
-                                        .href("fd-caches-ol-cdi/api/data/default/%s".formatted(id.toString()))
+                                        .href("fd-caches-sb-aop/api/data/default/%s".formatted(id.toString()))
                                         .type("GET")
                                         .build()
                         )
@@ -150,7 +150,7 @@ public class CachesIT {
                         Set.of(
                                 Link.builder()
                                         .rel("default")
-                                        .href("fd-caches-ol-cdi/api/data/default/%s".formatted(id.toString()))
+                                        .href("fd-caches-sb-aop/api/data/default/%s".formatted(id.toString()))
                                         .type("GET")
                                         .build()
                         )
@@ -177,7 +177,7 @@ public class CachesIT {
                         Set.of(
                                 Link.builder()
                                         .rel("named")
-                                        .href("fd-caches-ol-cdi/api/data/named/%s".formatted(id.toString()))
+                                        .href("fd-caches-sb-aop/api/data/named/%s".formatted(id.toString()))
                                         .type("GET")
                                         .build()
                         )
@@ -222,7 +222,7 @@ public class CachesIT {
                         Set.of(
                                 Link.builder()
                                         .rel("named")
-                                        .href("fd-caches-ol-cdi/api/data/named/%s".formatted(id.toString()))
+                                        .href("fd-caches-sb-aop/api/data/named/%s".formatted(id.toString()))
                                         .type("GET")
                                         .build()
                         )
@@ -263,7 +263,7 @@ public class CachesIT {
                         Set.of(
                                 Link.builder()
                                         .rel("named")
-                                        .href("fd-caches-ol-cdi/api/data/named/%s".formatted(id.toString()))
+                                        .href("fd-caches-sb-aop/api/data/named/%s".formatted(id.toString()))
                                         .type("GET")
                                         .build()
                         )
@@ -290,7 +290,7 @@ public class CachesIT {
                         Set.of(
                                 Link.builder()
                                         .rel("overridden")
-                                        .href("fd-caches-ol-cdi/api/data/overridden/%s".formatted(id.toString()))
+                                        .href("fd-caches-sb-aop/api/data/overridden/%s".formatted(id.toString()))
                                         .type("GET")
                                         .build()
                         )
@@ -335,7 +335,7 @@ public class CachesIT {
                         Set.of(
                                 Link.builder()
                                         .rel("overridden")
-                                        .href("fd-caches-ol-cdi/api/data/overridden/%s".formatted(id.toString()))
+                                        .href("fd-caches-sb-aop/api/data/overridden/%s".formatted(id.toString()))
                                         .type("GET")
                                         .build()
                         )
@@ -374,7 +374,7 @@ public class CachesIT {
                         Set.of(
                                 Link.builder()
                                         .rel("overridden")
-                                        .href("fd-caches-ol-cdi/api/data/overridden/%s".formatted(id.toString()))
+                                        .href("fd-caches-sb-aop/api/data/overridden/%s".formatted(id.toString()))
                                         .type("GET")
                                         .build()
                         )
@@ -401,7 +401,7 @@ public class CachesIT {
                         Set.of(
                                 Link.builder()
                                         .rel("disabled")
-                                        .href("fd-caches-ol-cdi/api/data/disabled/%s".formatted(id.toString()))
+                                        .href("fd-caches-sb-aop/api/data/disabled/%s".formatted(id.toString()))
                                         .type("GET")
                                         .build()
                         )

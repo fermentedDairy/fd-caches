@@ -1,10 +1,6 @@
-package org.fermented.dairy.caches.sb.aop.rest.providers;
+package org.fermented.dairy.caches.ol.cdi.rest.controller.provider;
 
-import org.fermented.dairy.caches.api.functions.Loader;
-import org.fermented.dairy.caches.api.functions.OptionalLoader;
-import org.fermented.dairy.caches.api.interfaces.CacheProvider;
-import org.springframework.stereotype.Component;
-
+import jakarta.enterprise.context.ApplicationScoped;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
@@ -12,8 +8,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.fermented.dairy.caches.api.functions.Loader;
+import org.fermented.dairy.caches.api.functions.OptionalLoader;
+import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 
-@Component
+@ApplicationScoped
 public class NamedCacheProvider implements CacheProvider {
 
     private static final ConcurrentHashMap<KeyHolder, ValueHolder> CACHE_MAP = new ConcurrentHashMap<>();

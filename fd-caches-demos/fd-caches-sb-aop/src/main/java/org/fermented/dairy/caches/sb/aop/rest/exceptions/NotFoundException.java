@@ -1,4 +1,4 @@
-package exceptions;
+package org.fermented.dairy.caches.sb.aop.rest.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

@@ -1,4 +1,4 @@
-package org.fermented.dairy.caches.ol.cdi.rest.providers;
+package org.fermented.dairy.caches.ol.cdi.rest.controller.provider;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.Collection;

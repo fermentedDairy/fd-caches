@@ -1,6 +1,6 @@
 package org.fermented.dairy.caches.sb.aop.rest.boundary;
 
-import exceptions.NotFoundException;
+import org.fermented.dairy.caches.sb.aop.rest.exceptions.NotFoundException;
 import io.swagger.v3.oas.annotations.media.Content;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

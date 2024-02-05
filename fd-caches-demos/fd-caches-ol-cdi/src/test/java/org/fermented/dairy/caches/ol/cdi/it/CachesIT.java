@@ -4,7 +4,7 @@ import org.fermented.dairy.caches.ol.cdi.rest.entity.records.ConfigOverriddenCac
 import org.fermented.dairy.caches.ol.cdi.rest.entity.records.DefaultCacheRecord;
 import org.fermented.dairy.caches.ol.cdi.rest.entity.records.DisabledCacheRecord;
 import org.fermented.dairy.caches.ol.cdi.rest.entity.records.NamedCacheRecord;
-import org.fermented.dairy.caches.ol.cdi.rest.entity.rto.Link;
+import org.fermented.dairy.caches.ol.cdi.rest.entity.rto.data.Link;
 import org.fermented.dairy.caches.ol.cdi.rest.entity.rto.data.PutRecordResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

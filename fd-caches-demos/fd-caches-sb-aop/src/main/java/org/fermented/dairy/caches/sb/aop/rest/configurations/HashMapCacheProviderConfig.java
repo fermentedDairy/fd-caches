@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class HashMapCacheProviderConfig {
 
-    @Bean
+    @Bean("hashMapCacheProvider")
     HashMapCacheProvider getHashMapCacheProvider() {
         return new HashMapCacheProvider();
     }

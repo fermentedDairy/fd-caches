@@ -4,12 +4,16 @@ import java.lang.reflect.Method;
 import java.util.List;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.fermented.dairy.caches.api.interfaces.CacheProvider;
 import org.fermented.dairy.caches.handlers.AbstractCacheHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 
+@Aspect
+@Component
 public class CacheDeleteAspect extends AbstractCacheHandler {
 
     /**

@@ -1,47 +1,39 @@
-package org.fermented.dairy.caches.ol.cdi.rest.boundary;
+package org.fermented.dairy.caches.sb.aop.rest.boundary;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import java.util.Map;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.text.StringSubstitutor;
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponseSchema;
-import org.fermented.dairy.caches.ol.cdi.rest.controller.service.DataService;
-import org.fermented.dairy.caches.ol.cdi.rest.entity.records.DefaultCacheRecord;
-import org.fermented.dairy.caches.ol.cdi.rest.entity.records.DisabledCacheRecord;
-import org.fermented.dairy.caches.ol.cdi.rest.entity.records.ConfigOverriddenCacheRecord;
-import org.fermented.dairy.caches.ol.cdi.rest.entity.records.NamedCacheRecord;
-import org.fermented.dairy.caches.ol.cdi.rest.entity.rto.data.Link;
-import org.fermented.dairy.caches.ol.cdi.rest.entity.rto.data.PutRecordResponse;
+import org.fermented.dairy.caches.sb.aop.rest.controller.aspect.Logged;
+import org.fermented.dairy.caches.sb.aop.rest.controller.service.DataService;
+import org.fermented.dairy.caches.sb.aop.rest.entity.records.ConfigOverriddenCacheRecord;
+import org.fermented.dairy.caches.sb.aop.rest.entity.records.DefaultCacheRecord;
+import org.fermented.dairy.caches.sb.aop.rest.entity.records.DisabledCacheRecord;
+import org.fermented.dairy.caches.sb.aop.rest.entity.records.NamedCacheRecord;
+import org.fermented.dairy.caches.sb.aop.rest.entity.rto.data.Link;
+import org.fermented.dairy.caches.sb.aop.rest.entity.rto.data.PutRecordResponse;
+import org.fermented.dairy.caches.sb.aop.rest.exceptions.NotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 
-import static org.fermented.dairy.caches.ol.cdi.rest.utils.Urls.*;
+import java.util.Map;
+import java.util.UUID;
 
-/**
- * REST Boundary for data operations.
- */
-@ApplicationScoped
-@AllArgsConstructor(onConstructor = @__(@Inject))
-@NoArgsConstructor
-@Path(DATA_ROOT)
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+import static org.fermented.dairy.caches.sb.aop.rest.utils.Urls.APP_ROOT;
+import static org.fermented.dairy.caches.sb.aop.rest.utils.Urls.CONTEXT_ROOT;
+import static org.fermented.dairy.caches.sb.aop.rest.utils.Urls.DATA_ROOT;
+import static org.fermented.dairy.caches.sb.aop.rest.utils.Urls.generateUrlFromParts;
+
+@AllArgsConstructor(onConstructor = @__(@Autowired))
+@RestController
+@RequestMapping("data")
 @Log
-public class DataRestService {
+public class DataRestController {
 
     private static final String DEFAULT_ID_PATH = "default/{id}";
 
@@ -51,18 +43,18 @@ public class DataRestService {
 
     private static final String DISABLED_ID_PATH = "disabled/{id}";
 
-    private DataService dataService;
+    private final DataService dataService;
 
-    @PUT
-    @Path("/default")
-    @APIResponse(
+    @PutMapping("default")
+    @ApiResponse(
             responseCode = "201",
             description = "PUT a new default cache record",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
     @Operation(
             summary = "Gets a set of keys for a given cache and provider")
-    @APIResponseSchema(PutRecordResponse.class)
-    public PutRecordResponse addDefault(@NotNull final DefaultCacheRecord cacheRecord) {
+    @Schema(contentSchema = PutRecordResponse.class)
+    @Logged
+    public PutRecordResponse addDefault(@NotNull @RequestBody final DefaultCacheRecord cacheRecord) {
         dataService.addDefaultCacheRecord(cacheRecord);
         return PutRecordResponse.builder()
                 .id(cacheRecord.id())
@@ -79,34 +71,32 @@ public class DataRestService {
                 .build();
     }
 
-    @GET
-    @Path(DEFAULT_ID_PATH)
-    @APIResponse(
+    @GetMapping(DEFAULT_ID_PATH)
+    @ApiResponse(
             responseCode = "200",
             description = "GET the DefaultCacheRecord requested",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    @APIResponse(
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+    @ApiResponse(
             responseCode = "404",
             description = "If the ID is not present.",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
     @Operation(
             summary = "Gets a set of keys for a given cache and provider")
-    @APIResponseSchema(DefaultCacheRecord.class)
-    public DefaultCacheRecord getDefault(@PathParam("id") final UUID id) {
+    @Schema(contentSchema = DefaultCacheRecord.class)
+    public DefaultCacheRecord getDefault(@PathVariable("id") final UUID id) {
         return dataService.getDefault(id).orElseThrow(() -> new NotFoundException("No DefaultCacheRecord with id %s found".formatted(id)));
     }
 
     @SuppressWarnings("checkstyle:MissingJavadocMethod")//In openAPI
-    @PUT
-    @Path("/named")
-    @APIResponse(
+    @PutMapping("named")
+    @ApiResponse(
             responseCode = "201",
             description = "PUT a new named cache record",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
     @Operation(
             summary = "Gets a set of keys for a given cache and provider")
-    @APIResponseSchema(PutRecordResponse.class)
-    public PutRecordResponse addNamed(@NotNull final NamedCacheRecord cacheRecord) {
+    @Schema(contentSchema = PutRecordResponse.class)
+    public PutRecordResponse addNamed(@NotNull @RequestBody final NamedCacheRecord cacheRecord) {
         dataService.addNamedCacheRecord(cacheRecord);
         return PutRecordResponse.builder()
                 .id(cacheRecord.id())
@@ -123,35 +113,33 @@ public class DataRestService {
                 .build();
     }
 
-    @GET
-    @Path(NAMED_ID_PATH)
-    @APIResponse(
+    @GetMapping(NAMED_ID_PATH)
+    @ApiResponse(
             responseCode = "200",
             description = "GET the NamedCacheRecord requested",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    @APIResponse(
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+    @ApiResponse(
             responseCode = "404",
             description = "If the ID is not present.",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
     @Operation(
             summary = "Gets a set of keys for a given cache and provider")
-    @APIResponseSchema(NamedCacheRecord.class)
-    public NamedCacheRecord getNamed(@PathParam("id") final UUID id) {
+    @Schema(contentSchema = NamedCacheRecord.class)
+    public NamedCacheRecord getNamed(@PathVariable("id") final UUID id) {
         return dataService.getNamedCacheRecord(id)
                 .orElseThrow(() -> new NotFoundException("No NamedCacheRecord with id %s found".formatted(id)));
     }
 
     @SuppressWarnings("checkstyle:MissingJavadocMethod")//In openAPI
-    @PUT
-    @Path("/overridden")
-    @APIResponse(
+    @PutMapping("overridden")
+    @ApiResponse(
             responseCode = "201",
             description = "PUT a new overridden cache record",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
     @Operation(
             summary = "Gets a set of keys for a given cache and provider")
-    @APIResponseSchema(PutRecordResponse.class)
-    public PutRecordResponse addOverridden(@NotNull final ConfigOverriddenCacheRecord cacheRecord) {
+    @Schema(contentSchema = PutRecordResponse.class)
+    public PutRecordResponse addOverridden(@NotNull @RequestBody final ConfigOverriddenCacheRecord cacheRecord) {
         dataService.addConfigOverriddenCacheRecord(cacheRecord);
         return PutRecordResponse.builder()
                 .id(cacheRecord.id())
@@ -168,35 +156,33 @@ public class DataRestService {
                 .build();
     }
 
-    @GET
-    @Path(OVERRIDDEN_ID_PATH)
-    @APIResponse(
+    @GetMapping(OVERRIDDEN_ID_PATH)
+    @ApiResponse(
             responseCode = "200",
             description = "GET the ConfigOverriddenCacheRecord requested",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    @APIResponse(
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+    @ApiResponse(
             responseCode = "404",
             description = "If the ID is not present.",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
     @Operation(
             summary = "Gets a set of keys for a given cache and provider")
-    @APIResponseSchema(ConfigOverriddenCacheRecord.class)
-    public ConfigOverriddenCacheRecord getOverridden(@PathParam("id") final UUID id) {
+    @Schema(contentSchema = ConfigOverriddenCacheRecord.class)
+    public ConfigOverriddenCacheRecord getOverridden(@PathVariable("id") final UUID id) {
         return dataService.getConfigOverriddenCacheRecord(id)
                 .orElseThrow(() -> new NotFoundException("No ConfigOverriddenCacheRecord with id %s found".formatted(id)));
     }
 
     @SuppressWarnings("checkstyle:MissingJavadocMethod")//In openAPI
-    @PUT
-    @Path("/disabled")
-    @APIResponse(
+    @PutMapping("disabled")
+    @ApiResponse(
             responseCode = "201",
             description = "PUT a new disabled cache record",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
     @Operation(
             summary = "Gets a set of keys for a given cache and provider")
-    @APIResponseSchema(PutRecordResponse.class)
-    public PutRecordResponse addDisabled(@NotNull final DisabledCacheRecord cacheRecord) {
+    @Schema(contentSchema = PutRecordResponse.class)
+    public PutRecordResponse addDisabled(@NotNull @RequestBody final DisabledCacheRecord cacheRecord) {
         dataService.addDisabledCacheRecord(cacheRecord);
         return PutRecordResponse.builder()
                 .id(cacheRecord.id())
@@ -213,20 +199,19 @@ public class DataRestService {
                 .build();
     }
 
-    @GET
-    @Path(DISABLED_ID_PATH)
-    @APIResponse(
+    @GetMapping(DISABLED_ID_PATH)
+    @ApiResponse(
             responseCode = "200",
             description = "GET the DisabledCacheRecord requested",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
-    @APIResponse(
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+    @ApiResponse(
             responseCode = "404",
             description = "If the ID is not present.",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
     @Operation(
             summary = "Gets a set of keys for a given cache and provider")
-    @APIResponseSchema(DisabledCacheRecord.class)
-    public DisabledCacheRecord getDisabled(@PathParam("id") final UUID id) {
+    @Schema(contentSchema = DisabledCacheRecord.class)
+    public DisabledCacheRecord getDisabled(@PathVariable("id") final UUID id) {
         return dataService.getDisabledCacheRecord(id)
                 .orElseThrow(() -> new NotFoundException("No DisabledCacheRecord with id %s found".formatted(id)));
     }

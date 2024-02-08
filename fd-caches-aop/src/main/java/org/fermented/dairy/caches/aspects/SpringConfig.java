@@ -17,7 +17,9 @@ public class SpringConfig implements CacheConfig {
 
     @Override
     public <T> Optional<T> getOptionalValue(final String key, final Class<T> klass) {
-        return Optional.ofNullable(environment.getProperty(key, klass));
+        return Optional.ofNullable(
+                environment.getProperty(key, klass)
+        );
     }
 
     public static CacheConfig using(final Environment environment) {

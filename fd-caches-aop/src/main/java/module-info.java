@@ -7,4 +7,5 @@ module fd.caches.aop {
     requires spring.context;
     requires fd.caches.annotations;
     exports org.fermented.dairy.caches.aspects;
+    opens org.fermented.dairy.caches.aspects to spring.core;
 }

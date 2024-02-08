@@ -326,7 +326,7 @@ public class CachesIT {
     }
 
     @Test
-    @DisplayName("PUT record and fetch from named cache, validate fetched object and verify presence in cache then delete and verify")
+    @DisplayName("PUT record and fetch from configured cache, validate fetched object and verify presence in cache then delete and verify")
     void putRecordFetchDeleteFromConfiguredCache() {
         final UUID id = UUID.randomUUID();
         validatePut(applicationUrl,

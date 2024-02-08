@@ -16,4 +16,6 @@ module fd.caches.sb.aop {
     requires org.aspectj.weaver;
     exports org.fermented.dairy.caches.sb.aop.rest.entity.records;
     exports org.fermented.dairy.caches.sb.aop.rest.entity.rto.data;
+    opens org.fermented.dairy.caches.sb.aop.rest to spring.core;
+    opens org.fermented.dairy.caches.sb.aop.rest.configurations to spring.core;
 }
